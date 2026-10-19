@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>EggPro - Rekap Recording Harian Ayam Petelur Pro | King Endog</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d97706">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="King Endog">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- QRCode.js CDN untuk Scan HP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase SDK CDN (Realtime Cloud Sync HP & Laptop) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col antialiased">
+
+    <!-- ============================================================== -->
+    <!-- TOP ORANGE HEADER (PERSIS SESUAI SCREENSHOT AISTUDIO)          -->
+    <!-- ============================================================== -->
+    <!-- Top Header -->
+    <header class="bg-[#d97706] text-white px-4 sm:px-8 py-3.5 shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3.5 w-full md:w-auto">
+                <div class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow flex-shrink-0">
+                    <div class="w-6 h-7 rounded-full bg-amber-500 transform rotate-12 flex items-center justify-center text-white text-xs font-bold">
+                        🥚
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+                        King Endog - Sistem Peternakan & Kasir Pro
+                    </h1>
+                    <p class="text-xs text-amber-100 font-medium">
+                        Rekap Recording Harian, Buku Kas Keuangan & Nota Penjualan Telur
+                    </p>
+                </div>
+            </div>
+
+            <!-- Top Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <!-- Tombol Sinkron Cloud HP & Laptop -->
+                <button onclick="EggApp.openCloudSyncModal()" id="btn-cloud-sync" class="flex items-center gap-1.5 px-3 py-2 bg-amber-900/80 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/50 transition shadow-xs active:scale-95" title="Sinkronisasi Cloud Real-time HP & Laptop">
+                    <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span id="cloud-sync-text">☁️ Sinkron HP & Laptop</span>
+                </button>
+                <button onclick="EggApp.openFarmSettingsModal()" class="flex items-center gap-1.5 px-3 py-2 bg-amber-700/80 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold border border-amber-500/60 transition shadow-xs active:scale-95">
+                    <span>⚙️</span>
+                    <span>Pengaturan Farm</span>
+                </button>
+                <button onclick="EggApp.loadSampleData()" class="flex items-center gap-1.5 px-3 py-2 bg-amber-700/80 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold border border-amber-500/60 transition shadow-xs active:scale-95">
+                    <span>📄</span>
+                    <span>Muat Data Contoh</span>
+                </button>
+                <button onclick="EggApp.resetData()" class="flex items-center gap-1.5 px-3 py-2 bg-[#b91c1c] hover:bg-red-800 text-white rounded-xl text-xs font-semibold transition shadow-xs active:scale-95">
+                    <span>🔄</span>
+                    <span>Reset Data</span>
+                </button>
+                <!-- Tombol Buka di HP / APK -->
+                <button onclick="EggApp.openQrModal()" class="flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold shadow-xs transition active:scale-95" title="Buka di HP lewat Wi-Fi">
+                    <span>📱</span>
+                    <span>Buka di HP</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- DESKTOP & TABLET VIEW TABS NAVIGATION BAR                      -->
+    <!-- ============================================================== -->
+    <nav class="bg-white/95 border-b border-slate-200/90 sticky top-[68px] z-20 backdrop-blur-md px-4 sm:px-8 py-2.5 shadow-xs">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <!-- View Switcher Tabs -->
+            <div class="flex items-center p-1 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600 shadow-inner">
+                <button
+                    id="view-tab-cashbook"
+                    onclick="EggApp.switchMainView('cashbook')"
+                    class="px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold"
+                >
+                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                    <span>Buku Kas & Nota Penjualan</span>
+                    <span id="badge-nav-cash-count" class="bg-amber-700 text-white text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
+                </button>
+                <button
+                    id="view-tab-recording"
+                    onclick="EggApp.switchMainView('recording')"
+                    class="px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold"
+                >
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    <span>Recording Kandang</span>
+                    <span id="badge-nav-rec-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
+                </button>
+                <button
+                    id="view-tab-all"
+                    onclick="EggApp.switchMainView('all')"
+                    class="px-3 py-2 rounded-xl transition text-slate-500 hover:text-slate-800 hidden md:flex items-center gap-1.5 font-medium"
+                    title="Tampilkan Kedua Layar Sekaligus"
+                >
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                    <span>Semua Layar</span>
+                </button>
+            </div>
+
+            <!-- Desktop & Tablet Status Badge + Cloud Sync Status Indicator -->
+            <div class="hidden sm:flex items-center gap-2.5 text-xs">
+                <button onclick="EggApp.openCloudSyncModal()" class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-full font-semibold transition cursor-pointer" id="badge-nav-cloud" title="Klik untuk Pengaturan Sinkronisasi Cloud">
+                    <span class="w-2 h-2 rounded-full bg-amber-500" id="badge-nav-cloud-dot"></span>
+                    <span id="badge-nav-cloud-text">Mode Offline (Klik untuk Hubungkan Cloud)</span>
+                </button>
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Desktop & Tablet Siap</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================== -->
+    <!-- MAIN CONTENT AREA                                              -->
+    <!-- ============================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ============================================================== -->
+        <!-- SECTION 1: RECORDING HARIAN & STICKY NOTE REPORT               -->
+        <!-- ============================================================== -->
+        <div id="recordingSection" class="space-y-6 hidden">
+
+        <!-- ============================================================== -->
+        <!-- KARTU STICKY NOTE: LAPORAN RECORDING PETERNAKAN AYAM           -->
+        <!-- (PERSIS 100% SESUAI DENGAN GAMBAR SCREENSHOT)                  -->
+        <!-- ============================================================== -->
+        <section class="max-w-3xl mx-auto">
+            <div class="sticky-report-card rounded-3xl p-6 sm:p-8 relative">
+                
+                <!-- Orange Sticky Pin Icon 📌 -->
+                <div class="sticky-pin" title="Sticky Note Laporan Siap Bagikan">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.707 3.293a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414l2.586 2.586L4 14v2h2l2.707-2.879 2.586 2.586a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-7-7z"/></svg>
+                </div>
+
+                <!-- Top Badges -->
+                <div class="flex items-center justify-between pr-12 mb-3">
+                    <span id="card-period-badge" class="bg-amber-200/80 text-amber-900 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wide">
+                        REKAP BULANAN SEPTEMBER 2026 • SEPTEMBER 2026
+                    </span>
+                    <div class="text-[11px] text-amber-800 font-semibold hidden sm:block">
+                        EggPro Recorder • <span class="text-emerald-700 font-bold">Status: Aktif</span>
+                    </div>
+                </div>
+
+                <!-- Card Header -->
+                <div class="mb-6">
+                    <h2 class="text-xl sm:text-2xl font-black text-[#5c2807] uppercase tracking-wide">
+                        LAPORAN RECORDING PETERNAKAN AYAM
+                    </h2>
+                    <p id="card-farm-subtitle" class="text-xs sm:text-sm text-[#873e0e] font-bold mt-1">
+                        Peternakan Barokah Layer Farm • Kandang A - Lohmann Brown
+                    </p>
+                </div>
+
+                <!-- 6 Metric Cards Grid (Persis Screenshot) -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 mb-5">
+                    
+                    <!-- 1. POPULASI AKHIR -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">POPULASI AKHIR</span>
+                        <div class="my-1.5">
+                            <span id="metric-populasi-akhir" class="text-xl sm:text-2xl font-black text-gray-900">30 Ekor</span>
+                        </div>
+                        <span id="metric-populasi-sub" class="text-[11px] text-gray-500 font-medium">Mati: 0 • Afkir: 1</span>
+                    </div>
+
+                    <!-- 2. TOTAL PAKAN -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL PAKAN</span>
+                        <div class="my-1.5">
+                            <span id="metric-total-pakan" class="text-xl sm:text-2xl font-black text-[#1d4ed8]">44,64 Kg</span>
+                        </div>
+                        <span id="metric-pakan-sub" class="text-[11px] text-gray-500 font-medium">122,3 gr/ekor</span>
+                    </div>
+
+                    <!-- 3. TOTAL TELUR -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL TELUR</span>
+                        <div class="my-1.5">
+                            <span id="metric-total-telur" class="text-xl sm:text-2xl font-black text-[#b45309]">279 Butir</span>
+                        </div>
+                        <span id="metric-telur-sub" class="text-[11px] text-gray-500 font-medium">277 Utuh • 2 Retak</span>
+                    </div>
+
+                    <!-- 4. BERAT TELUR -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BERAT TELUR</span>
+                        <div class="my-1.5">
+                            <span id="metric-berat-telur" class="text-xl sm:text-2xl font-black text-[#059669]">17,95 Kg</span>
+                        </div>
+                        <span id="metric-berat-sub" class="text-[11px] text-gray-500 font-medium">Rata: 23,3 btr/hari</span>
+                    </div>
+
+                    <!-- 5. RATA-RATA HD -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">RATA-RATA HD</span>
+                        <div class="my-1.5">
+                            <span id="metric-rata-hd" class="text-xl sm:text-2xl font-black text-[#059669]">76,43%</span>
+                        </div>
+                        <span id="metric-hd-sub" class="text-[11px] text-gray-500 font-medium">Target: 80%</span>
+                    </div>
+
+                    <!-- 6. FCR RATIO -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">FCR RATIO</span>
+                        <div class="my-1.5">
+                            <span id="metric-fcr-ratio" class="text-xl sm:text-2xl font-black text-[#d97706]">2,49</span>
+                        </div>
+                        <span id="metric-fcr-sub" class="text-[11px] text-gray-500 font-medium">EW: 64,3 gr/btr</span>
+                    </div>
+
+                </div>
+
+                <!-- Dark Bottom Bar (Persis Screenshot) -->
+                <div class="sticky-dark-bar p-4 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase text-amber-300 tracking-wider block">ESTIMASI LABA KOTOR PAKAN</span>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <span id="metric-laba-kotor" class="text-xl sm:text-2xl font-black text-[#22c55e]">Rp 120.209</span>
+                        </div>
+                        <span id="metric-laba-sub" class="text-[11px] text-amber-200/90 font-medium block">
+                            Pendapatan (Rp 450.545) - Biaya (Rp 330.336)
+                        </span>
+                    </div>
+
+                    <div class="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-white/10 w-full sm:w-auto">
+                        <span class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider block">HPP PAKAN RATA-RATA</span>
+                        <span id="metric-hpp-pakan" class="text-base sm:text-lg font-black text-white block mt-0.5">Rp 18.403 /kg</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- ACTION TOOLBAR                                                 -->
+        <!-- ============================================================== -->
+        <section class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="EggApp.openAddRecordModal()" class="flex items-center gap-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition active:scale-95">
+                    <span>➕</span>
+                    <span>Catat Recording Hari Ini</span>
+                </button>
+                <button onclick="EggApp.copyWhatsappFormat()" class="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition active:scale-95">
+                    <span>📲</span>
+                    <span>Salin Format WhatsApp</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition">
+                    <span>🖨️ Cetak</span>
+                </button>
+                <button onclick="EggApp.openQrModal()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition">
+                    <span>📱 Scan di HP</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TABEL DATA RECORDING HARIAN AYAM PETELUR                       -->
+        <!-- ============================================================== -->
+        <section class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Tabel Recording Harian Peternakan</h3>
+                    <p class="text-xs text-gray-500">Pencatatan mati, afkir, pakan, produksi telur utuh/retak, dan efisiensi FCR.</p>
+                </div>
+                <span id="records-count-badge" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">
+                    12 Hari Tercatat
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-gray-100/70 border-b border-gray-200 text-gray-600 font-bold uppercase text-[10px] tracking-wider">
+                            <th class="px-4 py-3">Tgl</th>
+                            <th class="px-4 py-3">Mati</th>
+                            <th class="px-4 py-3">Afkir</th>
+                            <th class="px-4 py-3">Populasi</th>
+                            <th class="px-4 py-3">Pakan (Kg)</th>
+                            <th class="px-4 py-3">gr/ekor</th>
+                            <th class="px-4 py-3">Utuh</th>
+                            <th class="px-4 py-3">Retak</th>
+                            <th class="px-4 py-3">Total Butir</th>
+                            <th class="px-4 py-3">Berat (Kg)</th>
+                            <th class="px-4 py-3">HD (%)</th>
+                            <th class="px-4 py-3">FCR</th>
+                            <th class="px-4 py-3 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-table-body" class="divide-y divide-gray-100">
+                        <!-- Di-generate otomatis oleh js/app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        </div><!-- End of recordingSection -->
+
+        <!-- ============================================================== -->
+        <!-- SECTION 2: BUKU KAS & NOTA PENJUALAN TELUR (EGG CASHBOOK)      -->
+        <!-- ============================================================== -->
+        <div id="cashbookSection" class="space-y-6 pb-6">
+            <!-- 4 Financial Stat Cards (Desktop & Tablet Optimized) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5">
+                <!-- Total Saldo -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+                        <span>Saldo Kas Bersih</span>
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <i data-lucide="wallet" class="w-4 h-4 text-amber-600"></i>
+                        </div>
+                    </div>
+                    <h3 id="cash-stat-saldo" class="text-xl sm:text-2xl lg:text-3xl font-extrabold font-mono tabular-nums text-slate-800 my-1">
+                        Rp 0
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Pemasukan dikurangi pengeluaran</p>
+                </div>
+
+                <!-- Total Pemasukan -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+                        <span>Total Pemasukan</span>
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                    </div>
+                    <h3 id="cash-stat-pemasukan" class="text-xl sm:text-2xl lg:text-3xl font-extrabold font-mono tabular-nums text-emerald-700 my-1">
+                        Rp 0
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Penjualan telur & hasil ternak</p>
+                </div>
+
+                <!-- Total Pengeluaran -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-rose-500 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+                        <span>Total Pengeluaran</span>
+                        <div class="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center">
+                            <i data-lucide="arrow-down-right" class="w-4 h-4 text-rose-500"></i>
+                        </div>
+                    </div>
+                    <h3 id="cash-stat-pengeluaran" class="text-xl sm:text-2xl lg:text-3xl font-extrabold font-mono tabular-nums text-rose-600 my-1">
+                        Rp 0
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Pakan, vitamin & operasional</p>
+                </div>
+
+                <!-- Total Piutang / Tempo -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+                        <span>Piutang / Tempo</span>
+                        <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <i data-lucide="receipt" class="w-4 h-4 text-indigo-600"></i>
+                        </div>
+                    </div>
+                    <h3 id="cash-stat-piutang" class="text-xl sm:text-2xl lg:text-3xl font-extrabold font-mono tabular-nums text-indigo-700 my-1">
+                        Rp 0
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Tagihan pelanggan belum lunas</p>
+                </div>
+            </div>
+
+            <!-- Main Cashbook & Invoices Area -->
+            <div class="bg-white p-5 sm:p-7 rounded-2xl shadow-xs border border-slate-200 space-y-4">
+                <!-- Header Bar with Action Buttons -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center space-x-2">
+                            <i data-lucide="wallet" class="w-5 h-5 text-amber-600"></i>
+                            <span>Buku Kas & Nota Penjualan Telur</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Pencatatan kas masuk/keluar peternakan dan pembuatan nota struk instan untuk pembeli.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button
+                            onclick="EggApp.openManualTransactionModal('pengeluaran')"
+                            class="text-xs bg-slate-50 hover:bg-rose-50 hover:text-rose-700 text-slate-700 border border-slate-200 hover:border-rose-200 px-3.5 py-2.5 rounded-xl font-semibold transition flex items-center space-x-1.5 shadow-xs"
+                        >
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Catat Pengeluaran</span>
+                        </button>
+
+                        <button
+                            onclick="EggApp.openManualTransactionModal('pemasukan')"
+                            class="text-xs bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 border border-slate-200 hover:border-emerald-200 px-3.5 py-2.5 rounded-xl font-semibold transition flex items-center space-x-1.5 shadow-xs"
+                        >
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Pemasukan Kas</span>
+                        </button>
+
+                        <button
+                            onclick="EggApp.openCreateInvoiceModal()"
+                            class="text-xs bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-xs"
+                        >
+                            <i data-lucide="receipt" class="w-4 h-4"></i>
+                            <span>+ Buat Nota Penjualan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- View Switcher: Buku Kas vs Daftar Nota -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <!-- Main Tab Toggle -->
+                    <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
+                        <button
+                            id="btn-tab-transaksi"
+                            onclick="EggApp.switchCashTab('transaksi')"
+                            class="px-3.5 py-1.5 rounded-lg transition bg-white shadow-xs text-amber-900 font-bold"
+                        >
+                            Buku Kas (<span id="cash-tab-count-trx">0</span>)
+                        </button>
+                        <button
+                            id="btn-tab-nota"
+                            onclick="EggApp.switchCashTab('nota')"
+                            class="px-3.5 py-1.5 rounded-lg transition hover:text-amber-800"
+                        >
+                            Daftar Nota Penjualan (<span id="cash-tab-count-inv">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Sub Filters for Transaksi -->
+                    <div id="cash-sub-filters" class="flex flex-wrap items-center gap-1.5 text-xs">
+                        <button onclick="EggApp.setCashFilter('semua')" class="cash-filter-btn px-2.5 py-1 rounded-lg transition capitalize font-medium bg-slate-800 text-white font-bold" data-filter="semua">
+                            Semua
+                        </button>
+                        <button onclick="EggApp.setCashFilter('pemasukan')" class="cash-filter-btn px-2.5 py-1 rounded-lg transition capitalize font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="pemasukan">
+                            Pemasukan
+                        </button>
+                        <button onclick="EggApp.setCashFilter('pengeluaran')" class="cash-filter-btn px-2.5 py-1 rounded-lg transition capitalize font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="pengeluaran">
+                            Pengeluaran
+                        </button>
+                        <button onclick="EggApp.setCashFilter('tempo')" class="cash-filter-btn px-2.5 py-1 rounded-lg transition capitalize font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="tempo">
+                            Tempo (Piutang)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search input -->
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input
+                        type="text"
+                        id="cash-search-input"
+                        oninput="EggApp.onSearchCash(this.value)"
+                        placeholder="Cari transaksi berdasarkan keterangan, kategori, atau nama pembeli..."
+                        class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 focus:bg-white"
+                    />
+                </div>
+
+                <!-- TAB 1: BUKU KAS TRANSAKSI TABLE -->
+                <div id="cash-table-wrapper" class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
+                                <th class="py-2.5 px-3">Waktu</th>
+                                <th class="py-2.5 px-2.5">Kategori</th>
+                                <th class="py-2.5 px-3">Keterangan & Pihak Terkait</th>
+                                <th class="py-2.5 px-2 text-center">Metode</th>
+                                <th class="py-2.5 px-3 text-right">Nominal (Rp)</th>
+                                <th class="py-2.5 px-2 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cash-table-body" class="divide-y divide-slate-100 font-sans">
+                            <!-- Populated by js/app.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB 2: DAFTAR NOTA PENJUALAN -->
+                <div id="cash-invoices-wrapper" class="hidden">
+                    <div id="cash-invoices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Populated by js/app.js -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 py-4 text-xs text-gray-500 text-center mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>© 2026 <strong>Rekap Recording Harian Ayam Petelur Pro</strong> (King Endog)</span>
+            <div class="flex items-center gap-3 text-gray-400 text-[11px]">
+                <span>PWA Standalone</span>
+                <span>•</span>
+                <span>Akses HP & Laptop</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================================== -->
+    <!-- MODALS                                                         -->
+    <!-- ============================================================== -->
+
+    <!-- 1. MODAL PENGATURAN FARM -->
+    <div id="modal-farm-settings" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="EggApp.closeFarmSettingsModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-700 text-lg">✕</button>
+            
+            <div class="mb-4">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">⚙️</span>
+                    <h3 class="text-lg font-bold text-gray-900">Pengaturan Data Peternakan</h3>
+                </div>
+                <p class="text-xs text-gray-500">Sesuaikan nama farm, strain ayam, target Hen-Day, dan parameter harga.</p>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Nama Peternakan</label>
+                    <input type="text" id="setting-farm-name" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-900">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Kandang & Strain Ayam</label>
+                        <input type="text" id="setting-coop-name" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Populasi Awal (Ekor)</label>
+                        <input type="number" id="setting-initial-pop" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Target Hen-Day (%)</label>
+                        <input type="number" step="0.1" id="setting-target-hd" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-emerald-700">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Periode Bulan/Tahun</label>
+                        <input type="text" id="setting-period" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Harga Jual Telur / Kg (Rp)</label>
+                        <input type="number" id="setting-egg-price" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-amber-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Harga Pakan / Kg (Rp)</label>
+                        <input type="number" id="setting-feed-price" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-blue-800">
+                    </div>
+                </div>
+
+                <!-- Cadangan & Pemulihan Data (Backup & Restore) -->
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 mt-2">
+                    <span class="font-bold text-slate-800 uppercase tracking-wider text-[10px] block">Cadangan Data (Backup & Restore)</span>
+                    <p class="text-[11px] text-slate-500">Simpan cadangan data ke file atau pindahkan data antara laptop dan HP.</p>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="EggApp.exportDataBackup()" class="py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl font-bold flex items-center justify-center gap-1.5 transition">
+                            <span>💾</span>
+                            <span>Unduh Backup</span>
+                        </button>
+                        <label class="py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl font-bold flex items-center justify-center gap-1.5 transition cursor-pointer text-center">
+                            <span>📥</span>
+                            <span>Pulihkan Data</span>
+                            <input type="file" accept=".json" onchange="EggApp.importDataBackup(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button onclick="EggApp.closeFarmSettingsModal()" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">
+                        Batal
+                    </button>
+                    <button onclick="EggApp.saveFarmSettings()" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow transition">
+                        Simpan Pengaturan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MODAL INPUT RECORDING HARIAN -->
+    <div id="modal-add-record" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="EggApp.closeAddRecordModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-700 text-lg">✕</button>
+
+            <div class="mb-4">
+                <h3 id="record-modal-title" class="text-base font-bold text-gray-900">Tambah Catatan Recording Harian</h3>
+                <p class="text-xs text-gray-500">Input hasil recording produksi telur dan konsumsi pakan hari ini.</p>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Tanggal</label>
+                    <input type="date" id="input-rec-date" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Ayam Mati (Ekor)</label>
+                        <input type="number" id="input-rec-dead" value="0" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Ayam Afkir (Ekor)</label>
+                        <input type="number" id="input-rec-cull" value="0" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Konsumsi Pakan (Kg)</label>
+                    <input type="number" step="0.01" id="input-rec-feed" placeholder="cth: 3.72" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-blue-700">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Telur Utuh (Butir)</label>
+                        <input type="number" id="input-rec-good" placeholder="cth: 24" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-amber-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Telur Retak/Pecah</label>
+                        <input type="number" id="input-rec-cracked" value="0" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-rose-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Total Berat Telur (Kg)</label>
+                    <input type="number" step="0.01" id="input-rec-weight" placeholder="cth: 1.52" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-emerald-700">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Catatan Kondisi / Obat</label>
+                    <input type="text" id="input-rec-notes" placeholder="cth: Pakan jagung + vitamin B-Kompleks" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl">
+                </div>
+
+                <div class="pt-3 flex gap-3">
+                    <button onclick="EggApp.closeAddRecordModal()" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">
+                        Batal
+                    </button>
+                    <button onclick="EggApp.saveDailyRecord()" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow transition">
+                        Simpan Recording
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.5 MODAL CLOUD REALTIME SYNC (FIREBASE FIRESTORE) -->
+    <div id="modal-cloud-sync" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-4">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold shadow-xs">
+                        ☁️
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-800">
+                            Sinkronisasi Cloud HP & Laptop
+                        </h3>
+                        <p class="text-[11px] text-slate-500 font-medium">
+                            Real-time Cloud Database (Firebase Firestore)
+                        </p>
+                    </div>
+                </div>
+                <button onclick="EggApp.closeCloudSyncModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Status Card -->
+            <div id="cloud-status-card" class="p-4 rounded-2xl border transition bg-amber-50/70 border-amber-200 text-amber-900">
+                <div class="flex items-start gap-3">
+                    <div id="cloud-status-dot" class="w-3 h-3 rounded-full bg-amber-500 mt-1 flex-shrink-0 animate-pulse"></div>
+                    <div class="space-y-1 text-xs">
+                        <div class="font-bold flex items-center gap-2">
+                            <span>Status:</span>
+                            <span id="cloud-status-text" class="text-amber-800 font-extrabold">Mode Offline (Belum Terhubung Database Cloud)</span>
+                        </div>
+                        <p id="cloud-status-desc" class="text-[11px] text-amber-800/90 leading-relaxed">
+                            Data transaksi saat ini hanya tersimpan di browser perangkat ini. Agar apa yang Anda input di HP <strong>langsung otomatis muncul di Laptop</strong> (dan sebaliknya), hubungkan dengan Firebase Firestore gratis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Firebase Config Input Box -->
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-700">
+                        Kode Konfigurasi Firebase:
+                    </label>
+                    <button type="button" class="text-[11px] text-amber-700 font-semibold hover:underline flex items-center gap-1" onclick="EggApp.toggleFirebaseGuide()">
+                        <span>📖</span>
+                        <span id="guide-toggle-label">Panduan Cepat (2 Menit)</span>
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-500">
+                    Bisa berupa kode JavaScript <code class="bg-slate-100 px-1 py-0.5 rounded text-amber-800 font-mono text-[10px]">const firebaseConfig = { ... }</code> atau JSON langsung dari Firebase Console.
+                </p>
+                <textarea
+                    id="input-firebase-config"
+                    rows="4"
+                    placeholder="Tempel / Paste kode konfigurasi Firebase Anda di sini..."
+                    class="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"
+                ></textarea>
+                
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button
+                        type="button"
+                        onclick="EggApp.saveCloudConfig()"
+                        class="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5 active:scale-95"
+                    >
+                        <span>⚡</span>
+                        <span>Simpan & Aktifkan Cloud Sync</span>
+                    </button>
+                    <button
+                        type="button"
+                        id="btn-disconnect-cloud"
+                        onclick="EggApp.disconnectCloud()"
+                        class="py-2.5 px-3 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-semibold border border-slate-200 transition hidden"
+                    >
+                        Putuskan Cloud
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section Share ke HP (Auto-Connect QR) -->
+            <div id="cloud-share-hp-card" class="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 space-y-3 hidden">
+                <div class="flex items-center gap-2 text-emerald-900 font-bold text-xs">
+                    <span>📱</span>
+                    <span>Hubungkan HP Anda (Otomatis Tanpa Perlu Ngetik Ulang)</span>
+                </div>
+                <p class="text-[11px] text-emerald-800">
+                    Scan kode QR ini menggunakan kamera HP Anda, atau salin link untuk dibuka di WhatsApp. HP akan langsung otomatis tersambung ke database yang sama!
+                </p>
+                <div class="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-emerald-200">
+                    <div id="cloud-hp-qrcode" class="flex-shrink-0 p-1 bg-white rounded-lg shadow-xs"></div>
+                    <div class="flex-1 space-y-2 text-center sm:text-left w-full">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Link Khusus Auto-Sync HP:</span>
+                        <input id="cloud-hp-link-input" type="text" readonly class="w-full text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-slate-700 select-all" />
+                        <button onclick="EggApp.copyCloudHpLink()" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition flex items-center justify-center gap-1">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>Salin Link HP</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panduan 2 Menit Membuat Firebase -->
+            <div id="firebase-guide-box" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2.5">
+                <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>📌</span>
+                    <span>Cara Cepat Membuat Database Firebase Gratis (2 Menit):</span>
+                </h4>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-600 text-[11px] leading-relaxed">
+                    <li>Buka <a href="https://console.firebase.google.com" target="_blank" class="text-amber-700 underline font-semibold">console.firebase.google.com</a> dan login dengan akun Google.</li>
+                    <li>Klik <strong>"Add project"</strong>, beri nama misal: <code class="bg-slate-200 px-1 py-0.5 rounded text-slate-800">kandang-ayam</code> (Analytics boleh dimatikan).</li>
+                    <li>Di menu samping kiri, klik <strong>Build &gt; Firestore Database</strong> &gt; klik <strong>Create database</strong> &gt; pilih <strong>Start in test mode</strong> &gt; Next &gt; Enable.</li>
+                    <li>Di samping tulisan "Project Overview" (kiri atas), klik ikon gear ⚙️ &gt; pilih <strong>Project settings</strong>.</li>
+                    <li>Scroll ke bawah ke bagian "Your apps", klik ikon web <strong>&lt;/&gt;</strong> &gt; masukkan nama app &gt; klik Register app.</li>
+                    <li>Salin seluruh kode <code class="bg-slate-200 px-1 py-0.5 rounded text-slate-800">const firebaseConfig = { ... };</code> lalu tempel di kotak di atas!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MODAL QR CODE UNTUK BUKA DI HP -->
+    <div id="modal-qr" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl relative">
+            <button onclick="EggApp.closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-lg">✕</button>
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mx-auto mb-2 shadow">
+                📱
+            </div>
+            <h3 class="font-extrabold text-base text-gray-900">Buka di HP Anda</h3>
+            <p class="text-xs text-gray-500 mt-1">Scan kode QR ini menggunakan kamera HP untuk membuka aplikasi:</p>
+            
+            <div id="qrcode-container" class="my-4 flex justify-center p-3 bg-gray-50 rounded-2xl border border-gray-200"></div>
+
+            <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-200 text-left">
+                <span id="qr-modal-label" class="text-[10px] text-amber-800 font-bold block uppercase">Alamat Aplikasi:</span>
+                <code id="qr-modal-url" class="text-xs font-mono text-amber-900 font-bold select-all break-all">http://192.168.1.19:3000</code>
+            </div>
+            <p id="qr-modal-hint" class="text-[10px] text-gray-400 mt-2">Bisa discan langsung dari kamera smartphone Anda.</p>
+        </div>
+    </div>
+
+    <!-- 4. MODAL CATAT TRANSAKSI KAS MANUAL -->
+    <div id="modal-manual-transaction" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 id="manual-trx-modal-title" class="text-base font-bold text-slate-800">
+                    Catat Pengeluaran Kas
+                </h3>
+                <button onclick="EggApp.closeManualTransactionModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="EggApp.handleManualTransactionSubmit(event)" class="space-y-4 text-xs">
+                <!-- Type Toggle -->
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl font-bold">
+                    <button
+                        type="button"
+                        id="btn-trx-type-pengeluaran"
+                        onclick="EggApp.setManualTransactionType('pengeluaran')"
+                        class="py-2 rounded-lg transition bg-rose-600 text-white shadow-xs"
+                    >
+                        Pengeluaran (Kas Keluar)
+                    </button>
+                    <button
+                        type="button"
+                        id="btn-trx-type-pemasukan"
+                        onclick="EggApp.setManualTransactionType('pemasukan')"
+                        class="py-2 rounded-lg transition text-slate-600 hover:text-slate-900"
+                    >
+                        Pemasukan (Kas Masuk)
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">
+                        Nominal (Rp) <span class="text-rose-500 font-bold">*</span>
+                    </label>
+                    <input
+                        type="number"
+                        min="1"
+                        required
+                        id="manual-trx-amount"
+                        placeholder="Contoh: 150000"
+                        class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono text-sm font-bold bg-white"
+                    />
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Kategori</label>
+                    <select
+                        id="manual-trx-category"
+                        class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white font-medium"
+                    >
+                        <!-- Populated dynamically by EggApp -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Keterangan Transaksi</label>
+                    <input
+                        type="text"
+                        id="manual-trx-desc"
+                        placeholder="Contoh: Beli pakan jagung giling 1 sak 50 kg"
+                        class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pihak / Supplier / Toko</label>
+                        <input
+                            type="text"
+                            id="manual-trx-customer"
+                            placeholder="Nama pihak terkait"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Metode Bayar</label>
+                        <select
+                            id="manual-trx-method"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white font-medium"
+                        >
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer Bank">Transfer Bank</option>
+                            <option value="QRIS">QRIS</option>
+                            <option value="Tempo">Tempo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                        type="button"
+                        onclick="EggApp.closeManualTransactionModal()"
+                        class="px-4 py-2 text-slate-600 hover:text-slate-900 font-medium"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="submit"
+                        class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition"
+                    >
+                        Simpan Transaksi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. MODAL BUAT NOTA PENJUALAN TELUR -->
+    <div id="modal-create-invoice" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-xl w-full p-6 space-y-4 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Buat Nota Penjualan Telur</h3>
+                        <p class="text-[11px] text-slate-400">Nota resmi langsung terhubung ke Buku Kas & Struk WhatsApp</p>
+                    </div>
+                </div>
+                <button onclick="EggApp.closeCreateInvoiceModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="EggApp.handleCreateInvoiceSubmit(event)" class="space-y-4 text-xs">
+                <!-- Info Pembeli & Tanggal -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Nama Pembeli / Pelanggan <span class="text-rose-500 font-bold">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            id="invoice-buyer-name"
+                            placeholder="cth: Ibu Hj. Nurul (Warung Berkah)"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp / HP</label>
+                        <input
+                            type="text"
+                            id="invoice-buyer-phone"
+                            placeholder="cth: 081234567890"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tanggal Nota</label>
+                        <input
+                            type="date"
+                            id="invoice-date"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Waktu / Jam</label>
+                        <input
+                            type="time"
+                            id="invoice-time"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                    </div>
+                </div>
+
+                <!-- Daftar Item Barang -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Daftar Item Penjualan</label>
+                        <button
+                            type="button"
+                            onclick="EggApp.addInvoiceItemRow()"
+                            class="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1 text-[11px]"
+                        >
+                            <i data-lucide="plus" class="w-3 h-3"></i>
+                            <span>Tambah Item</span>
+                        </button>
+                    </div>
+
+                    <div id="invoice-items-container" class="space-y-2">
+                        <!-- Items rendered by js/app.js -->
+                    </div>
+                </div>
+
+                <!-- Kalkulasi Pembayaran & Status -->
+                <div class="p-3.5 bg-amber-50/60 rounded-2xl border border-amber-200/70 space-y-2.5">
+                    <div class="flex justify-between items-center text-slate-600">
+                        <span>Subtotal Item:</span>
+                        <span id="invoice-calc-subtotal" class="font-mono font-bold text-slate-800 text-xs">Rp 0</span>
+                    </div>
+
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-600">Diskon / Potongan (Rp):</span>
+                        <input
+                            type="number"
+                            min="0"
+                            id="invoice-discount"
+                            value="0"
+                            oninput="EggApp.recalculateInvoiceTotals()"
+                            class="w-32 px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-right font-mono font-bold text-rose-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-amber-200 text-sm">
+                        <span class="font-bold text-slate-800">TOTAL AKHIR:</span>
+                        <span id="invoice-calc-total" class="font-mono font-black text-amber-900 text-base">Rp 0</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Metode Bayar</label>
+                            <select
+                                id="invoice-method"
+                                onchange="EggApp.onInvoiceMethodChange(this.value)"
+                                class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-semibold text-xs"
+                            >
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer Bank">Transfer Bank</option>
+                                <option value="QRIS">QRIS</option>
+                                <option value="Tempo">Tempo (Piutang)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Jumlah Dibayar (Rp)</label>
+                            <input
+                                type="number"
+                                min="0"
+                                id="invoice-paid-amount"
+                                oninput="EggApp.recalculateInvoiceTotals()"
+                                class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono font-bold text-emerald-700 text-xs"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-amber-200/60 text-[11px]">
+                        <div>
+                            <span class="text-slate-500">Status Pembayaran: </span>
+                            <span id="invoice-calc-status-badge" class="font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                LUNAS
+                            </span>
+                        </div>
+                        <div id="invoice-calc-remaining-wrap" class="hidden text-right">
+                            <span class="text-slate-500">Sisa Piutang: </span>
+                            <span id="invoice-calc-remaining" class="font-mono font-bold text-rose-600">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan (Opsional)</label>
+                    <input
+                        type="text"
+                        id="invoice-notes"
+                        placeholder="cth: Pengantaran sore hari ke lokasi warung"
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                        type="button"
+                        onclick="EggApp.closeCreateInvoiceModal()"
+                        class="px-4 py-2 text-slate-600 hover:text-slate-900 font-medium"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="submit"
+                        class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-1.5"
+                    >
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                        <span>Simpan & Buat Nota</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. MODAL BUKA / CETAK / BAGIKAN NOTA PENJUALAN -->
+    <div id="modal-view-invoice" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Preview Struk Nota</span>
+                <button onclick="EggApp.closeViewInvoiceModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Printable Receipt Card Container -->
+            <div id="printable-receipt-card" class="receipt-paper border border-slate-200 p-5 text-slate-800 text-xs space-y-3 font-sans">
+                <!-- Farm Header -->
+                <div class="text-center pb-3 receipt-divider">
+                    <h3 id="receipt-farm-name" class="font-black text-sm uppercase tracking-wide text-slate-900">
+                        PETERNAKAN BAROKAH LAYER FARM
+                    </h3>
+                    <p id="receipt-coop-name" class="text-[11px] text-slate-500">
+                        Kandang A - Lohmann Brown • Telur Segar Harian
+                    </p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">
+                        WhatsApp: King Endog Farm System
+                    </p>
+                </div>
+
+                <!-- Invoice Meta Details -->
+                <div class="flex justify-between text-[11px] text-slate-600 pt-1">
+                    <div>
+                        <div class="font-bold text-amber-900 font-mono" id="receipt-invoice-id">INV-000</div>
+                        <div class="text-slate-500" id="receipt-datetime">2026-10-19 14:00</div>
+                    </div>
+                    <div class="text-right">
+                        <span id="receipt-status-badge" class="inline-block px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800">
+                            LUNAS
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-[11px]">
+                    <span class="text-slate-400 uppercase text-[9px] font-bold block">Kepada Pembeli:</span>
+                    <div class="font-bold text-slate-900" id="receipt-buyer-name">-</div>
+                    <div class="text-slate-500" id="receipt-buyer-phone">-</div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="pt-1">
+                    <table class="w-full text-left text-[11px]">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[9px]">
+                                <th class="pb-1">Item</th>
+                                <th class="pb-1 text-center">Qty</th>
+                                <th class="pb-1 text-right">Harga</th>
+                                <th class="pb-1 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receipt-items-body" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Financial Calculation Summary -->
+                <div class="receipt-divider pt-2.5 space-y-1 text-[11px]">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Subtotal:</span>
+                        <span id="receipt-subtotal" class="font-mono tabular-nums">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-500" id="receipt-discount-row">
+                        <span>Diskon:</span>
+                        <span id="receipt-discount" class="font-mono tabular-nums text-rose-600">- Rp 0</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-slate-900 text-xs pt-1 border-t border-slate-100">
+                        <span>TOTAL TAGIHAN:</span>
+                        <span id="receipt-final-amount" class="font-mono tabular-nums text-amber-900 font-extrabold text-sm">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Metode Pembayaran:</span>
+                        <span id="receipt-method" class="font-semibold">Tunai</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-700 font-bold">
+                        <span>Jumlah Dibayar:</span>
+                        <span id="receipt-paid-amount" class="font-mono tabular-nums">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-rose-600 font-bold" id="receipt-remaining-row">
+                        <span>Sisa Piutang (Tempo):</span>
+                        <span id="receipt-remaining-amount" class="font-mono tabular-nums">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- Notes & Footer -->
+                <div class="receipt-divider pt-2.5 text-center text-[10px] text-slate-400">
+                    <p id="receipt-notes" class="text-slate-600 italic mb-1"></p>
+                    <p class="font-semibold text-slate-500">*** Terima Kasih Telah Berbelanja ***</p>
+                    <p>Telur segar bermutu tinggi langsung dari kandang peternakan</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons: Print, WA, Close -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button
+                    type="button"
+                    onclick="EggApp.sendInvoiceWhatsapp()"
+                    class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 text-xs"
+                >
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>Kirim WhatsApp</span>
+                </button>
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 active:bg-black text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 text-xs"
+                >
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span>Cetak Struk</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 max-w-xs w-full pointer-events-none"></div>
+
+    <!-- Application Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>

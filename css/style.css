@@ -1,0 +1,89 @@
+/* KING ENDOG - Rekap Recording Harian Ayam Petelur Pro Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8fafc;
+}
+
+/* Sticky Note Shadow & Feel */
+.sticky-report-card {
+    background: #fefce8; /* Soft warm yellow/cream */
+    border: 2px solid #fef08a;
+    box-shadow: 0 10px 30px -5px rgba(217, 119, 6, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+/* Pin decoration */
+.sticky-pin {
+    width: 38px;
+    height: 38px;
+    background: #ea580c;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.4);
+    position: absolute;
+    top: 18px;
+    right: 22px;
+}
+
+/* Dark footer bar inside sticky card */
+.sticky-dark-bar {
+    background-color: #1f140a; /* Dark brown/black */
+    border-radius: 1rem;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #fef3c7;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d97706;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b45309;
+}
+
+/* Receipt Struk Styling */
+.receipt-paper {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    position: relative;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+.receipt-divider {
+    border-top: 1.5px dashed #cbd5e1;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printable-receipt-card, #printable-receipt-card * {
+        visibility: visible;
+    }
+    #printable-receipt-card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+    }
+}
