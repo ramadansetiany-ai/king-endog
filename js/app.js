@@ -40,20 +40,20 @@ const EggApp = {
         feedPrice: 7400   // Rp / kg
     },
 
-    // 12 Hari Data Contoh Recording
+    // 12 Hari Data Contoh Recording (Persis Screenshot 1, 2, dan 3)
     defaultRecords: [
-        { date: "2026-09-01", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.48, notes: "Kondisi ayam sehat" },
-        { date: "2026-09-02", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.54, notes: "Nafsu makan baik" },
-        { date: "2026-09-03", dead: 0, cull: 0, feed: 3.72, good: 22, cracked: 1, weight: 1.42, notes: "Pemberian vitamin anti-stres" },
-        { date: "2026-09-04", dead: 0, cull: 0, feed: 3.72, good: 25, cracked: 0, weight: 1.61, notes: "Cuaca cerah" },
-        { date: "2026-09-05", dead: 0, cull: 1, feed: 3.72, good: 23, cracked: 0, weight: 1.49, notes: "Afkir 1 ekor ayam terluka" },
-        { date: "2026-09-06", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.55, notes: "Kandang dibersihkan" },
-        { date: "2026-09-07", dead: 0, cull: 0, feed: 3.72, good: 22, cracked: 0, weight: 1.41, notes: "Air minum diganti" },
-        { date: "2026-09-08", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 1, weight: 1.53, notes: "Telur retak di sarang" },
-        { date: "2026-09-09", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.47, notes: "Kondisi stabil" },
-        { date: "2026-09-10", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.49, notes: "Vaksinasi berkala" },
-        { date: "2026-09-11", dead: 0, cull: 0, feed: 3.72, good: 22, cracked: 0, weight: 1.43, notes: "Pakan dihabiskan" },
-        { date: "2026-09-12", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.53, notes: "Panen sore normal" }
+        { date: "2026-09-01", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.54, notes: "Kondisi ayam aktif, pakan habis bersih" },
+        { date: "2026-09-02", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.48, notes: "Pemberian vitamin via air minum" },
+        { date: "2026-09-03", dead: 0, cull: 0, feed: 3.72, good: 25, cracked: 0, weight: 1.61, notes: "-" },
+        { date: "2026-09-04", dead: 0, cull: 0, feed: 3.72, good: 22, cracked: 1, weight: 1.47, notes: "1 butir retak di egg tray" },
+        { date: "2026-09-05", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.55, notes: "-" },
+        { date: "2026-09-06", dead: 0, cull: 1, feed: 3.72, good: 23, cracked: 0, weight: 1.49, notes: "1 ekor afkir karena prolapsus" },
+        { date: "2026-09-07", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.54, notes: "Evaluasi mingguan Minggu 1" },
+        { date: "2026-09-08", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.48, notes: "-" },
+        { date: "2026-09-09", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.53, notes: "Desinfeksi lorong kandang" },
+        { date: "2026-09-10", dead: 0, cull: 0, feed: 3.72, good: 23, cracked: 0, weight: 1.47, notes: "-" },
+        { date: "2026-09-11", dead: 0, cull: 0, feed: 3.72, good: 24, cracked: 0, weight: 1.54, notes: "-" },
+        { date: "2026-09-12", dead: 0, cull: 0, feed: 3.72, good: 19, cracked: 1, weight: 1.25, notes: "Penurunan produksi sore hari" }
     ],
 
     // Data Contoh Nota Penjualan
@@ -206,8 +206,14 @@ const EggApp = {
         }
     ],
 
+    // App State
+    activeMainView: 'recording',
+    trendMetric: 'hd',
+    trendChartInstance: null,
+    editingRecordIndex: null,
+    activeStickyFilter: 'all',
+
     // Cashbook & Invoices State
-    activeMainView: 'cashbook',
     cashActiveTab: 'transaksi',
     cashFilterType: 'semua',
     cashSearchQuery: '',
@@ -232,8 +238,8 @@ const EggApp = {
         this.renderCashbook();
         this.setupCurrentDate();
         
-        // Terapkan view utama (default: cashbook / buku kas & nota)
-        const savedView = localStorage.getItem(this.STORAGE_VIEW) || 'cashbook';
+        // Terapkan view utama (default: recording / rekap recording harian ayam petelur)
+        const savedView = localStorage.getItem(this.STORAGE_VIEW) || 'recording';
         this.switchMainView(savedView);
 
         // Inisialisasi Sinkronisasi Real-time Cloud (Firebase Firestore)
@@ -344,13 +350,15 @@ const EggApp = {
         this.showToast("Data recording & kas berhasil direset.", "info");
     },
 
-    // --- DESKTOP & TABLET VIEW SWITCHER ---
+    // --- VIEW SWITCHER (RECORDING HARIAN & BUKU KAS) ---
     switchMainView(viewName) {
         this.activeMainView = viewName;
         localStorage.setItem(this.STORAGE_VIEW, viewName);
 
         const recSec = document.getElementById("recordingSection");
         const cashSec = document.getElementById("cashbookSection");
+        const headerTabRec = document.getElementById("header-tab-recording");
+        const headerTabCash = document.getElementById("header-tab-cashbook");
         const btnCash = document.getElementById("view-tab-cashbook");
         const btnRec = document.getElementById("view-tab-recording");
         const btnAll = document.getElementById("view-tab-all");
@@ -358,15 +366,34 @@ const EggApp = {
         if (viewName === 'cashbook') {
             if (cashSec) cashSec.classList.remove("hidden");
             if (recSec) recSec.classList.add("hidden");
+
+            if (headerTabCash) {
+                headerTabCash.className = "px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
+            }
+            if (headerTabRec) {
+                headerTabRec.className = "px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95";
+            }
+
             if (btnCash) btnCash.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold";
             if (btnRec) btnRec.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold";
             if (btnAll) btnAll.className = "px-3 py-2 rounded-xl transition text-slate-500 hover:text-slate-800 hidden md:flex items-center gap-1.5 font-medium";
         } else if (viewName === 'recording') {
             if (cashSec) cashSec.classList.add("hidden");
             if (recSec) recSec.classList.remove("hidden");
+
+            if (headerTabRec) {
+                headerTabRec.className = "px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
+            }
+            if (headerTabCash) {
+                headerTabCash.className = "px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95";
+            }
+
             if (btnRec) btnRec.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold";
             if (btnCash) btnCash.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold";
             if (btnAll) btnAll.className = "px-3 py-2 rounded-xl transition text-slate-500 hover:text-slate-800 hidden md:flex items-center gap-1.5 font-medium";
+
+            // Render ulang chart agar pas dengan lebar kontainer
+            setTimeout(() => this.renderTrendChart(this.trendMetric || 'hd'), 50);
         } else {
             // Tampilkan kedua section
             if (cashSec) cashSec.classList.remove("hidden");
@@ -374,12 +401,24 @@ const EggApp = {
             if (btnAll) btnAll.className = "px-3 py-2 rounded-xl transition bg-slate-800 text-white shadow-xs hidden md:flex items-center gap-1.5 font-bold";
             if (btnCash) btnCash.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold";
             if (btnRec) btnRec.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold";
+            setTimeout(() => this.renderTrendChart(this.trendMetric || 'hd'), 50);
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (window.lucide) {
             lucide.createIcons();
         }
+    },
+
+    jumpTo(elementId) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    },
+
+    changeRecordingMonth(monthVal) {
+        this.showToast(`Memuat data recording untuk periode ${monthVal}`, "info");
     },
 
     closeAllModals() {
@@ -394,7 +433,7 @@ const EggApp = {
     },
 
     // ==============================================================
-    // 1. RECORDING KALKULASI & RENDERING
+    // 1. RECORDING KALKULASI & RENDERING (PERSIS SCREENSHOT 1, 2, 3)
     // ==============================================================
     calculateAndRender() {
         const settings = this.getSettings();
@@ -422,7 +461,7 @@ const EggApp = {
         if (countBadge) countBadge.textContent = `${records.length} Hari Tercatat`;
         this.setText("badge-nav-rec-count", `${records.length}`);
 
-        // Proses setiap baris harian
+        // Proses setiap baris harian untuk tabel 15 kolom persis Screenshot 3
         const rowsHtml = records.map((rec, index) => {
             totalDead += rec.dead;
             totalCull += rec.cull;
@@ -438,33 +477,60 @@ const EggApp = {
             const gramPerEkorDay = currentPop > 0 ? (rec.feed * 1000) / currentPop : 0;
             const hdDay = currentPop > 0 ? (totalEggsDay / currentPop) * 100 : 0;
             const fcrDay = rec.weight > 0 ? (rec.feed / rec.weight) : 0;
+            const ewDay = totalEggsDay > 0 ? (rec.weight * 1000) / totalEggsDay : 0;
+
+            const d = new Date(rec.date + 'T00:00:00');
+            const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            const dayName = isNaN(d.getTime()) ? '-' : dayNames[d.getDay()];
+            const dateLabel = isNaN(d.getTime()) ? rec.date : `Tgl ${d.getDate()}`;
+
+            const maDisplay = (rec.dead === 0 && rec.cull === 0)
+                ? '<span class="text-slate-400 font-medium">-</span>'
+                : `<span class="text-rose-600 font-extrabold">${rec.dead}/${rec.cull}</span>`;
+
+            const retakDisplay = rec.cracked > 0
+                ? `<span class="text-rose-600 font-bold">${rec.cracked}</span>`
+                : `<span class="text-rose-400 font-normal">0</span>`;
 
             return `
-                <tr class="hover:bg-amber-50/40 transition">
-                    <td class="px-4 py-3 font-semibold text-gray-900">${rec.date}</td>
-                    <td class="px-4 py-3 text-rose-600 font-bold">${rec.dead}</td>
-                    <td class="px-4 py-3 text-amber-700 font-bold">${rec.cull}</td>
-                    <td class="px-4 py-3 font-extrabold text-gray-800">${currentPop}</td>
-                    <td class="px-4 py-3 text-blue-700 font-bold">${rec.feed.toLocaleString('id-ID', { minimumFractionDigits: 2 })}</td>
-                    <td class="px-4 py-3 text-gray-500">${gramPerEkorDay.toFixed(1)}</td>
-                    <td class="px-4 py-3 text-gray-800 font-semibold">${rec.good}</td>
-                    <td class="px-4 py-3 text-rose-600 font-semibold">${rec.cracked}</td>
-                    <td class="px-4 py-3 text-amber-800 font-bold">${totalEggsDay}</td>
-                    <td class="px-4 py-3 text-emerald-700 font-bold">${rec.weight.toLocaleString('id-ID', { minimumFractionDigits: 2 })}</td>
-                    <td class="px-4 py-3 text-emerald-600 font-bold">${hdDay.toFixed(2)}%</td>
-                    <td class="px-4 py-3 text-amber-700 font-semibold">${fcrDay.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-right">
-                        <button onclick="EggApp.deleteDailyRecord(${index})" class="text-gray-300 hover:text-rose-600 p-1" title="Hapus">✕</button>
+                <tr class="hover:bg-amber-50/50 transition">
+                    <td class="px-3.5 py-3 text-center font-bold text-slate-800">${dateLabel}</td>
+                    <td class="px-3 py-3 text-slate-600 font-medium">${dayName}</td>
+                    <td class="px-3 py-3 text-center font-black text-slate-900">${currentPop}</td>
+                    <td class="px-3 py-3 text-center">${maDisplay}</td>
+                    <td class="px-3 py-3 text-right font-bold text-slate-700">${rec.feed.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-3 py-3 text-right text-slate-500">${gramPerEkorDay.toFixed(1).replace('.', ',')}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${rec.good}</td>
+                    <td class="px-3 py-3 text-center">${retakDisplay}</td>
+                    <td class="px-3 py-3 text-center font-black text-slate-900">${totalEggsDay}</td>
+                    <td class="px-3 py-3 text-right font-bold text-emerald-700">${rec.weight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-3.5 py-3 text-center">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                            ${hdDay.toFixed(1).replace('.', ',')}%
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 text-right text-slate-700 font-medium">${ewDay.toFixed(1).replace('.', ',')}</td>
+                    <td class="px-3 py-3 text-right text-slate-800 font-bold">${fcrDay.toFixed(2).replace('.', ',')}</td>
+                    <td class="px-4 py-3 text-slate-600 truncate max-w-[200px]" title="${rec.notes || ''}">${rec.notes || '-'}</td>
+                    <td class="px-3.5 py-3 text-center">
+                        <div class="inline-flex items-center gap-1.5">
+                            <button onclick="EggApp.editDailyRecord(${index})" class="text-slate-400 hover:text-amber-600 p-1 transition" title="Edit Baris Ini">
+                                ✏️
+                            </button>
+                            <button onclick="EggApp.deleteDailyRecord(${index})" class="text-slate-400 hover:text-rose-600 p-1 transition" title="Hapus">
+                                🗑️
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
         }).join("");
 
         if (tableBody) {
-            tableBody.innerHTML = rowsHtml || `<tr><td colspan="13" class="px-4 py-8 text-center text-gray-400">Belum ada catatan harian. Klik "Muat Data Contoh" atau "+ Catat Recording Hari Ini".</td></tr>`;
+            tableBody.innerHTML = rowsHtml || `<tr><td colspan="15" class="px-4 py-8 text-center text-slate-400">Belum ada catatan harian. Klik "Muat Data Contoh" atau "+ Catat Hari Ini".</td></tr>`;
         }
 
-        // Kalkulasi Agregat Laporan (Sticky Note)
+        // Kalkulasi Agregat Laporan (12 KPI Cards & Sticky Note)
         const daysCount = records.length || 1;
         const avgPop = records.length > 0 ? (popSum / records.length) : settings.initialPop;
         const totalEggs = totalGood + totalCracked;
@@ -481,7 +547,32 @@ const EggApp = {
         const labaKotor = pendapatanTelur - biayaPakan;
         const hppPakanPerKg = totalWeight > 0 ? (biayaPakan / totalWeight) : 0;
 
-        // Update Tampilan 6 Metric Cards
+        // 12 KPI Summary Cards (Baris 1 & Baris 2)
+        this.setText("kpi-ayam-awal", `${settings.initialPop}`);
+        this.setText("kpi-ayam-akhir", `${finalPop}`);
+        this.setText("kpi-sub-ayam-akhir", `Mati: ${totalDead} • Afkir: ${totalCull}`);
+        this.setText("kpi-afkir-mati", `${totalDead + totalCull}`);
+        const mortRate = ((totalDead / (settings.initialPop || 1)) * 100).toFixed(1).replace('.', ',');
+        this.setText("kpi-sub-mortalitas", `Mortalitas: ${mortRate}%`);
+
+        this.setText("kpi-total-pakan", `${totalFeed.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        this.setText("kpi-sub-pakan", `${gramPerEkorAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gr/ekor/hari`);
+
+        this.setText("kpi-total-telur", `${totalEggs}`);
+        this.setText("kpi-sub-telur", `Utuh: ${totalGood} • Retak: ${totalCracked}`);
+
+        this.setText("kpi-total-berat", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+
+        this.setText("kpi-rata-telur", `${avgEggsPerDay.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`);
+        this.setText("kpi-sub-hari", `${records.length} hari recording`);
+
+        this.setText("kpi-rata-hd", `${avgHd.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
+        this.setText("kpi-rata-ew", `${eggWeightAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`);
+        this.setText("kpi-fcr", `${fcrRatio.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        this.setText("kpi-hpp", `Rp ${Math.round(hppPakanPerKg).toLocaleString('id-ID')}`);
+        this.setText("kpi-laba", `Rp ${Math.round(labaKotor).toLocaleString('id-ID')}`);
+
+        // Update Tampilan Kartu Sticky Note Kuning
         this.setText("metric-populasi-akhir", `${finalPop} Ekor`);
         this.setText("metric-populasi-sub", `Mati: ${totalDead} • Afkir: ${totalCull}`);
 
@@ -500,7 +591,249 @@ const EggApp = {
         this.setText("metric-fcr-ratio", `${fcrRatio.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
         this.setText("metric-fcr-sub", `EW: ${eggWeightAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gr/btr`);
 
-        // Update Dark Bottom Bar
+        // Update Dark Bottom Bar Sticky Note
+        this.setText("metric-laba-kotor", `Rp ${Math.round(labaKotor).toLocaleString('id-ID')}`);
+        this.setText("metric-laba-sub", `Pendapatan (Rp ${Math.round(pendapatanTelur).toLocaleString('id-ID')}) - Biaya (Rp ${Math.round(biayaPakan).toLocaleString('id-ID')})`);
+        this.setText("metric-hpp-pakan", `Rp ${Math.round(hppPakanPerKg).toLocaleString('id-ID')} /kg`);
+
+        // Render Grafik Tren
+        this.renderTrendChart(this.trendMetric || 'hd');
+    },
+
+    // --- GRAFIK TREN PERFORMA RECORDING (PERSIS SCREENSHOT 2) ---
+    switchTrendMetric(metric) {
+        this.trendMetric = metric;
+
+        const btnHd = document.getElementById("btn-metric-hd");
+        const btnButir = document.getElementById("btn-metric-butir");
+        const btnFcr = document.getElementById("btn-metric-fcr");
+
+        const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-emerald-700 border border-emerald-500/30 shadow-xs font-bold transition";
+        const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+
+        if (btnHd) btnHd.className = metric === 'hd' ? activeClass : inactiveClass;
+        if (btnButir) btnButir.className = metric === 'butir' ? activeClass : inactiveClass;
+        if (btnFcr) btnFcr.className = metric === 'fcr' ? activeClass : inactiveClass;
+
+        this.renderTrendChart(metric);
+    },
+
+    renderTrendChart(metric = 'hd') {
+        const canvas = document.getElementById("recordingTrendChart");
+        if (!canvas) return;
+
+        if (this.trendChartInstance) {
+            this.trendChartInstance.destroy();
+            this.trendChartInstance = null;
+        }
+
+        const settings = this.getSettings();
+        const records = this.getRecords();
+        if (records.length === 0) return;
+
+        let currentPop = settings.initialPop;
+        const labels = [];
+        const dataValues = [];
+
+        records.forEach((rec, idx) => {
+            currentPop = currentPop - rec.dead - rec.cull;
+            const totalEggsDay = rec.good + rec.cracked;
+            const d = new Date(rec.date + 'T00:00:00');
+            const label = isNaN(d.getTime()) ? `Tgl ${idx + 1}` : `Tgl ${d.getDate()}`;
+            labels.push(label);
+
+            if (metric === 'hd') {
+                const hd = currentPop > 0 ? (totalEggsDay / currentPop) * 100 : 0;
+                dataValues.push(parseFloat(hd.toFixed(1)));
+            } else if (metric === 'butir') {
+                dataValues.push(totalEggsDay);
+            } else if (metric === 'fcr') {
+                const fcr = rec.weight > 0 ? (rec.feed / rec.weight) : 0;
+                dataValues.push(parseFloat(fcr.toFixed(2)));
+            }
+        });
+
+        const ctx = canvas.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, "rgba(5, 150, 105, 0.22)");
+        gradient.addColorStop(1, "rgba(5, 150, 105, 0.0)");
+
+        const datasets = [{
+            label: metric === 'hd' ? "Hen Day (%)" : metric === 'butir' ? "Produksi (Butir)" : "Rasio FCR",
+            data: dataValues,
+            borderColor: metric === 'hd' ? "#059669" : metric === 'butir' ? "#d97706" : "#2563eb",
+            backgroundColor: gradient,
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: "#ffffff",
+            pointBorderColor: metric === 'hd' ? "#059669" : metric === 'butir' ? "#d97706" : "#2563eb",
+            pointBorderWidth: 2,
+            pointRadius: 4.5,
+            pointHoverRadius: 6.5
+        }];
+
+        // Tambahkan garis Target putus-putus untuk Hen Day (Persis Screenshot 2)
+        if (metric === 'hd') {
+            const targetVal = settings.targetHd || 80.0;
+            datasets.push({
+                label: `Target (${targetVal.toFixed(0)}%)`,
+                data: Array(labels.length).fill(targetVal),
+                borderColor: "#10b981",
+                borderWidth: 1.5,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                fill: false
+            });
+        }
+
+        this.trendChartInstance = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: metric === 'hd',
+                        position: "top",
+                        align: "end",
+                        labels: {
+                            boxWidth: 14,
+                            font: { size: 10, weight: "bold" },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (metric === 'hd') {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                                } else if (metric === 'butir') {
+                                    return `Produksi: ${context.parsed.y} butir`;
+                                } else {
+                                    return `FCR: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: metric === 'hd' ? 50 : undefined,
+                        max: metric === 'hd' ? 100 : undefined,
+                        ticks: {
+                            callback: function(val) {
+                                if (metric === 'hd') return val.toFixed(1);
+                                return val;
+                            },
+                            font: { size: 10 }
+                        },
+                        grid: {
+                            color: "rgba(226, 232, 240, 0.6)"
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // --- FILTER MINGGUAN STICKY NOTE (PERSIS SCREENSHOT 1) ---
+    setStickyFilter(filter) {
+        this.activeStickyFilter = filter;
+        const tabs = ['all', 'w1', 'w2', 'w3', 'w4', 'w5'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`sticky-tab-${t}`);
+            if (btn) {
+                if (t === filter) {
+                    btn.className = "px-3.5 py-1.5 rounded-xl bg-white text-slate-900 shadow-xs font-extrabold transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium";
+                }
+            }
+        });
+
+        const settings = this.getSettings();
+        const records = this.getRecords();
+        let filteredRecords = records;
+
+        if (filter === 'w1') filteredRecords = records.slice(0, 7);
+        else if (filter === 'w2') filteredRecords = records.slice(7, 14);
+        else if (filter === 'w3') filteredRecords = records.slice(14, 21);
+        else if (filter === 'w4') filteredRecords = records.slice(21, 28);
+        else if (filter === 'w5') filteredRecords = records.slice(28);
+
+        // Update Card Period Badge
+        const filterNames = {
+            all: settings.period,
+            w1: "MINGGU 1 (TGL 1 - 7)",
+            w2: "MINGGU 2 (TGL 8 - 14)",
+            w3: "MINGGU 3 (TGL 15 - 21)",
+            w4: "MINGGU 4 (TGL 22 - 28)",
+            w5: "MINGGU 5 (TGL 29 - 31)"
+        };
+        const badge = document.getElementById("card-period-badge");
+        if (badge) {
+            badge.textContent = `${filterNames[filter] || settings.period} • ${settings.period.replace('REKAP BULANAN ', '')}`;
+        }
+
+        // Kalkulasi ulang metric kartu sticky note
+        let currentPop = settings.initialPop;
+        let totalDead = 0;
+        let totalCull = 0;
+        let totalFeed = 0;
+        let totalGood = 0;
+        let totalCracked = 0;
+        let totalWeight = 0;
+        let popSum = 0;
+
+        filteredRecords.forEach(rec => {
+            totalDead += rec.dead;
+            totalCull += rec.cull;
+            currentPop = currentPop - rec.dead - rec.cull;
+            popSum += currentPop;
+            totalFeed += rec.feed;
+            totalGood += rec.good;
+            totalCracked += rec.cracked;
+            totalWeight += rec.weight;
+        });
+
+        const daysCount = filteredRecords.length || 1;
+        const avgPop = filteredRecords.length > 0 ? (popSum / filteredRecords.length) : settings.initialPop;
+        const totalEggs = totalGood + totalCracked;
+        const finalPop = currentPop;
+        const gramPerEkorAvg = (avgPop > 0 && daysCount > 0) ? (totalFeed * 1000) / (avgPop * daysCount) : 0;
+        const avgEggsPerDay = totalEggs / daysCount;
+        const avgHd = (avgPop > 0 && daysCount > 0) ? (totalEggs / (avgPop * daysCount)) * 100 : 0;
+        const fcrRatio = totalWeight > 0 ? (totalFeed / totalWeight) : 0;
+        const eggWeightAvg = totalEggs > 0 ? (totalWeight * 1000) / totalEggs : 0;
+
+        const pendapatanTelur = totalWeight * settings.eggPrice;
+        const biayaPakan = totalFeed * settings.feedPrice;
+        const labaKotor = pendapatanTelur - biayaPakan;
+        const hppPakanPerKg = totalWeight > 0 ? (biayaPakan / totalWeight) : 0;
+
+        this.setText("metric-populasi-akhir", `${finalPop} Ekor`);
+        this.setText("metric-populasi-sub", `Mati: ${totalDead} • Afkir: ${totalCull}`);
+        this.setText("metric-total-pakan", `${totalFeed.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`);
+        this.setText("metric-pakan-sub", `${gramPerEkorAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gr/ekor`);
+        this.setText("metric-total-telur", `${totalEggs} Butir`);
+        this.setText("metric-telur-sub", `${totalGood} Utuh • ${totalCracked} Retak`);
+        this.setText("metric-berat-telur", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`);
+        this.setText("metric-berat-sub", `Rata: ${avgEggsPerDay.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} btr/hari`);
+        this.setText("metric-rata-hd", `${avgHd.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
+        this.setText("metric-hd-sub", `Target: ${settings.targetHd}%`);
+        this.setText("metric-fcr-ratio", `${fcrRatio.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        this.setText("metric-fcr-sub", `EW: ${eggWeightAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gr/btr`);
         this.setText("metric-laba-kotor", `Rp ${Math.round(labaKotor).toLocaleString('id-ID')}`);
         this.setText("metric-laba-sub", `Pendapatan (Rp ${Math.round(pendapatanTelur).toLocaleString('id-ID')}) - Biaya (Rp ${Math.round(biayaPakan).toLocaleString('id-ID')})`);
         this.setText("metric-hpp-pakan", `Rp ${Math.round(hppPakanPerKg).toLocaleString('id-ID')} /kg`);
@@ -1284,16 +1617,52 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
     // 3. FORMULIR RECORDING HARIAN
     // ==============================================================
     openAddRecordModal() {
+        this.editingRecordIndex = null;
+        const title = document.getElementById("record-modal-title");
+        if (title) title.textContent = "Tambah Catatan Recording Harian";
+
+        this.setupCurrentDate();
+        if (document.getElementById("input-rec-dead")) document.getElementById("input-rec-dead").value = "0";
+        if (document.getElementById("input-rec-cull")) document.getElementById("input-rec-cull").value = "0";
+        if (document.getElementById("input-rec-feed")) document.getElementById("input-rec-feed").value = "";
+        if (document.getElementById("input-rec-good")) document.getElementById("input-rec-good").value = "";
+        if (document.getElementById("input-rec-cracked")) document.getElementById("input-rec-cracked").value = "0";
+        if (document.getElementById("input-rec-weight")) document.getElementById("input-rec-weight").value = "";
+        if (document.getElementById("input-rec-notes")) document.getElementById("input-rec-notes").value = "";
+
         const modal = document.getElementById("modal-add-record");
-        if (modal) {
-            this.setupCurrentDate();
-            modal.classList.remove("hidden");
-        }
+        if (modal) modal.classList.remove("hidden");
+    },
+
+    editDailyRecord(index) {
+        const records = this.getRecords();
+        const rec = records[index];
+        if (!rec) return;
+
+        this.editingRecordIndex = index;
+        const d = new Date(rec.date + 'T00:00:00');
+        const dateNum = isNaN(d.getTime()) ? index + 1 : d.getDate();
+
+        const title = document.getElementById("record-modal-title");
+        if (title) title.textContent = `Edit Catatan Recording (Tgl ${dateNum})`;
+
+        if (document.getElementById("input-rec-date")) document.getElementById("input-rec-date").value = rec.date;
+        if (document.getElementById("input-rec-dead")) document.getElementById("input-rec-dead").value = rec.dead;
+        if (document.getElementById("input-rec-cull")) document.getElementById("input-rec-cull").value = rec.cull;
+        if (document.getElementById("input-rec-feed")) document.getElementById("input-rec-feed").value = rec.feed;
+        if (document.getElementById("input-rec-good")) document.getElementById("input-rec-good").value = rec.good;
+        if (document.getElementById("input-rec-cracked")) document.getElementById("input-rec-cracked").value = rec.cracked;
+        if (document.getElementById("input-rec-weight")) document.getElementById("input-rec-weight").value = rec.weight;
+        if (document.getElementById("input-rec-notes")) document.getElementById("input-rec-notes").value = rec.notes || "";
+
+        const modal = document.getElementById("modal-add-record");
+        if (modal) modal.classList.remove("hidden");
     },
 
     closeAddRecordModal() {
         const modal = document.getElementById("modal-add-record");
         if (modal) modal.classList.add("hidden");
+        this.editingRecordIndex = null;
     },
 
     saveDailyRecord() {
@@ -1311,8 +1680,7 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
             return;
         }
 
-        const records = this.getRecords();
-        records.push({
+        const newRec = {
             date: date,
             dead: dead,
             cull: cull,
@@ -1321,19 +1689,23 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
             cracked: cracked,
             weight: weight,
             notes: notes
-        });
+        };
+
+        const records = this.getRecords();
+
+        if (this.editingRecordIndex !== null && this.editingRecordIndex >= 0 && this.editingRecordIndex < records.length) {
+            records[this.editingRecordIndex] = newRec;
+            this.editingRecordIndex = null;
+            this.showToast("Catatan recording berhasil diperbarui!", "success");
+        } else {
+            records.push(newRec);
+            this.showToast("Recording harian berhasil disimpan!", "success");
+        }
 
         records.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         this.saveRecords(records);
         this.closeAddRecordModal();
-        this.showToast("Recording harian berhasil disimpan!", "success");
-
-        if (document.getElementById("input-rec-feed")) document.getElementById("input-rec-feed").value = "";
-        if (document.getElementById("input-rec-good")) document.getElementById("input-rec-good").value = "";
-        if (document.getElementById("input-rec-cracked")) document.getElementById("input-rec-cracked").value = "0";
-        if (document.getElementById("input-rec-weight")) document.getElementById("input-rec-weight").value = "";
-        if (document.getElementById("input-rec-notes")) document.getElementById("input-rec-notes").value = "";
     },
 
     deleteDailyRecord(index) {

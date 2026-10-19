@@ -59,164 +59,97 @@
     <!-- TOP ORANGE HEADER (PERSIS SESUAI SCREENSHOT AISTUDIO)          -->
     <!-- ============================================================== -->
     <!-- Top Header -->
-    <header class="bg-[#d97706] text-white px-4 sm:px-8 py-3 shadow-md sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+    <header class="bg-[#d97706] text-white px-3 sm:px-6 py-2.5 shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
             
-            <!-- Logo Baru (Ayam Mahkota 3D) & Title -->
-            <div class="flex items-center gap-3">
-                <img src="icons/logo.png" alt="Logo King Endog" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl object-cover shadow-md border border-amber-300/40 flex-shrink-0 bg-emerald-950" />
+            <!-- Left: Logo & Title (Persis AI Studio) -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white flex items-center justify-center p-1 shadow-sm flex-shrink-0">
+                    <img src="icons/logo.png" alt="Logo King Endog" class="w-full h-full object-contain rounded-xl" />
+                </div>
                 <div>
-                    <h1 class="text-base sm:text-lg font-black tracking-tight leading-tight flex items-center gap-1.5">
-                        <span>King Endog</span>
-                        <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-amber-800/80 border border-amber-400/40 text-amber-200">PRO</span>
+                    <h1 class="text-sm sm:text-base md:text-lg font-black tracking-tight leading-tight text-white flex items-center gap-1.5">
+                        <span>Rekap Recording Harian Ayam Petelur Pro</span>
                     </h1>
-                    <p class="text-[11px] text-amber-100 font-medium hidden sm:block">
-                        Rekap Recording Harian, Buku Kas Keuangan & Nota Penjualan
+                    <p class="text-[10px] sm:text-[11px] text-amber-100 font-medium">
+                        Format Bulanan Terstruktur, Buku Kas & Nota Siap Kirim
                     </p>
                 </div>
             </div>
 
-            <!-- Top Right: Live Cloud Status Badge + Dropdown Menu Rapi -->
-            <div class="flex items-center gap-2">
-                <!-- Pill Status Sinkron Cloud (Klik untuk buka detail) -->
+            <!-- Right: Action Buttons (Persis Screenshot 1) -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <!-- Tab View Switcher -->
+                <button
+                    id="header-tab-recording"
+                    onclick="EggApp.switchMainView('recording')"
+                    class="px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95"
+                >
+                    <span>📄</span>
+                    <span>Recording Harian</span>
+                </button>
+
+                <button
+                    id="header-tab-cashbook"
+                    onclick="EggApp.switchMainView('cashbook')"
+                    class="px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95"
+                >
+                    <span>🧾</span>
+                    <span>Buku Kas & Nota</span>
+                </button>
+
+                <!-- + Nota Telur (Green Button) -->
+                <button
+                    onclick="EggApp.openCreateInvoiceModal()"
+                    class="px-3.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                    title="Buat Nota Penjualan Telur Baru"
+                >
+                    <span class="text-sm font-black">+</span>
+                    <span>Nota Telur</span>
+                </button>
+
+                <!-- ⚙️ Settings -->
+                <button
+                    onclick="EggApp.openFarmSettingsModal()"
+                    class="w-8 h-8 sm:w-9 sm:h-9 bg-amber-800/80 hover:bg-amber-800 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center justify-center transition"
+                    title="Pengaturan Peternakan & Kandang"
+                >
+                    ⚙️
+                </button>
+
+                <!-- 📄 Contoh Data -->
+                <button
+                    onclick="EggApp.loadSampleData()"
+                    class="px-2.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center gap-1 transition"
+                    title="Muat Data Contoh Peternakan"
+                >
+                    <span>📄</span>
+                    <span class="hidden sm:inline">Contoh</span>
+                </button>
+
+                <!-- 🔄 Reset Data (Red circle/pill) -->
+                <button
+                    onclick="EggApp.resetData()"
+                    class="w-8 h-8 sm:w-9 sm:h-9 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center justify-center transition shadow-xs"
+                    title="Reset / Bersihkan Seluruh Data"
+                >
+                    🔄
+                </button>
+
+                <!-- Live Cloud Sync Pill -->
                 <button
                     onclick="EggApp.openCloudSyncModal()"
                     id="btn-cloud-sync"
-                    class="flex items-center gap-1.5 px-3 py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95"
-                    title="Status Sinkronisasi Cloud Multi-Perangkat"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 sm:py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95"
+                    title="Status Sinkronisasi Cloud Multi-Perangkat (HP & Laptop)"
                 >
-                    <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="cloud-sync-text" class="text-xs font-bold">Cloud Aktif</span>
+                    <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="cloud-sync-text" class="text-[11px] font-bold hidden sm:inline">Cloud Aktif</span>
                 </button>
-
-                <!-- Tombol Dropdown Menu Tunggal yang Rapi -->
-                <div class="relative" id="dropdown-menu-wrapper">
-                    <button
-                        type="button"
-                        id="btn-header-menu"
-                        onclick="EggApp.toggleHeaderMenu(event)"
-                        class="flex items-center gap-1.5 px-3 py-2 bg-amber-800 hover:bg-amber-900 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-400/50 transition shadow-xs cursor-pointer"
-                        title="Buka Menu & Pengaturan"
-                    >
-                        <i data-lucide="menu" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Menu</span>
-                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-80"></i>
-                    </button>
-
-                    <!-- Dropdown Content Popover -->
-                    <div
-                        id="header-dropdown-menu"
-                        class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 py-1.5 z-50 text-slate-700 text-xs font-medium"
-                    >
-                        <div class="px-3.5 py-1.5 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            Menu & Pengaturan
-                        </div>
-
-                        <button onclick="EggApp.openCloudSyncModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
-                            <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-sm shadow-xs">☁️</span>
-                            <div>
-                                <div class="font-bold text-slate-800">Sinkron Cloud HP & Laptop</div>
-                                <div class="text-[10px] text-slate-400">Database Firebase Real-time</div>
-                            </div>
-                        </button>
-
-                        <button onclick="EggApp.openFarmSettingsModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
-                            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm shadow-xs">⚙️</span>
-                            <div>
-                                <div class="font-bold text-slate-800">Pengaturan Farm & Harga</div>
-                                <div class="text-[10px] text-slate-400">Nama kandang, harga pakan/telur</div>
-                            </div>
-                        </button>
-
-                        <button onclick="EggApp.openQrModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
-                            <span class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center text-sm shadow-xs">📱</span>
-                            <div>
-                                <div class="font-bold text-slate-800">Buka di HP (QR Code)</div>
-                                <div class="text-[10px] text-slate-400">Akses langsung dari smartphone</div>
-                            </div>
-                        </button>
-
-                        <button onclick="EggApp.exportDataBackup(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
-                            <span class="w-7 h-7 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-sm shadow-xs">💾</span>
-                            <div>
-                                <div class="font-bold text-slate-800">Unduh Backup Data (JSON)</div>
-                                <div class="text-[10px] text-slate-400">Simpan cadangan ke laptop</div>
-                            </div>
-                        </button>
-
-                        <div class="my-1 border-t border-slate-100"></div>
-
-                        <button onclick="EggApp.loadSampleData(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2.5 transition text-slate-600">
-                            <span class="w-7 h-7 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm shadow-xs">📄</span>
-                            <div>
-                                <div class="font-semibold text-slate-700">Muat Data Contoh</div>
-                                <div class="text-[10px] text-slate-400">Isi data simulasi Barokah Farm</div>
-                            </div>
-                        </button>
-
-                        <button onclick="EggApp.resetData(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2 hover:bg-rose-50 flex items-center gap-2.5 transition text-rose-600">
-                            <span class="w-7 h-7 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm shadow-xs">🔄</span>
-                            <div>
-                                <div class="font-bold text-rose-600">Reset Semua Data</div>
-                                <div class="text-[10px] text-rose-400">Hapus semua transaksi & catatan</div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
             </div>
 
         </div>
     </header>
-
-    <!-- ============================================================== -->
-    <!-- DESKTOP & TABLET VIEW TABS NAVIGATION BAR                      -->
-    <!-- ============================================================== -->
-    <nav class="bg-white/95 border-b border-slate-200/90 sticky top-[68px] z-20 backdrop-blur-md px-4 sm:px-8 py-2.5 shadow-xs">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <!-- View Switcher Tabs -->
-            <div class="flex items-center p-1 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600 shadow-inner">
-                <button
-                    id="view-tab-cashbook"
-                    onclick="EggApp.switchMainView('cashbook')"
-                    class="px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold"
-                >
-                    <i data-lucide="wallet" class="w-4 h-4"></i>
-                    <span>Buku Kas & Nota Penjualan</span>
-                    <span id="badge-nav-cash-count" class="bg-amber-700 text-white text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button
-                    id="view-tab-recording"
-                    onclick="EggApp.switchMainView('recording')"
-                    class="px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-amber-900 font-semibold"
-                >
-                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-                    <span>Recording Kandang</span>
-                    <span id="badge-nav-rec-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button
-                    id="view-tab-all"
-                    onclick="EggApp.switchMainView('all')"
-                    class="px-3 py-2 rounded-xl transition text-slate-500 hover:text-slate-800 hidden md:flex items-center gap-1.5 font-medium"
-                    title="Tampilkan Kedua Layar Sekaligus"
-                >
-                    <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-                    <span>Semua Layar</span>
-                </button>
-            </div>
-
-            <!-- Desktop & Tablet Status Badge + Cloud Sync Status Indicator -->
-            <div class="hidden sm:flex items-center gap-2.5 text-xs">
-                <button onclick="EggApp.openCloudSyncModal()" class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-full font-semibold transition cursor-pointer" id="badge-nav-cloud" title="Klik untuk Pengaturan Sinkronisasi Cloud">
-                    <span class="w-2 h-2 rounded-full bg-amber-500" id="badge-nav-cloud-dot"></span>
-                    <span id="badge-nav-cloud-text">Mode Offline (Klik untuk Hubungkan Cloud)</span>
-                </button>
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Desktop & Tablet Siap</span>
-                </span>
-            </div>
-        </div>
-    </nav>
 
     <!-- ============================================================== -->
     <!-- MAIN CONTENT AREA                                              -->
@@ -226,190 +159,426 @@
         <!-- ============================================================== -->
         <!-- SECTION 1: RECORDING HARIAN & STICKY NOTE REPORT               -->
         <!-- ============================================================== -->
-        <div id="recordingSection" class="space-y-6 hidden">
+        <div id="recordingSection" class="space-y-6">
 
-        <!-- ============================================================== -->
-        <!-- KARTU STICKY NOTE: LAPORAN RECORDING PETERNAKAN AYAM           -->
-        <!-- (PERSIS 100% SESUAI DENGAN GAMBAR SCREENSHOT)                  -->
-        <!-- ============================================================== -->
-        <section class="max-w-3xl mx-auto">
-            <div class="sticky-report-card rounded-3xl p-6 sm:p-8 relative">
-                
-                <!-- Orange Sticky Pin Icon 📌 -->
-                <div class="sticky-pin" title="Sticky Note Laporan Siap Bagikan">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.707 3.293a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414l2.586 2.586L4 14v2h2l2.707-2.879 2.586 2.586a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-7-7z"/></svg>
-                </div>
+            <!-- 1. PILIH PERIODE BULAN & LOMPAT CEPAT BAR (PERSIS SCREENSHOT 1) -->
+            <section id="sec-period" class="bg-white rounded-2xl border border-amber-100 shadow-xs p-4 sm:p-5">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <!-- Left: Month Period Selector -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-700 flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+                            📅
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">PILIH PERIODE BULAN RECORDING</span>
+                            <div class="relative mt-0.5">
+                                <select
+                                    id="select-recording-month"
+                                    onchange="EggApp.changeRecordingMonth(this.value)"
+                                    class="bg-white border border-slate-300 text-slate-800 font-extrabold text-sm rounded-xl pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs cursor-pointer appearance-none"
+                                >
+                                    <option value="2026-09" selected>September 2026</option>
+                                    <option value="2026-10">Oktober 2026</option>
+                                    <option value="2026-08">Agustus 2026</option>
+                                </select>
+                                <span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">▼</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <!-- Top Badges -->
-                <div class="flex items-center justify-between pr-12 mb-3">
-                    <span id="card-period-badge" class="bg-amber-200/80 text-amber-900 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wide">
-                        REKAP BULANAN SEPTEMBER 2026 • SEPTEMBER 2026
-                    </span>
-                    <div class="text-[11px] text-amber-800 font-semibold hidden sm:block">
-                        EggPro Recorder • <span class="text-emerald-700 font-bold">Status: Aktif</span>
+                    <!-- Right: Lompat Cepat Pills (Persis Screenshot 1) -->
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span class="text-slate-400 font-semibold mr-1 text-[11px]">Lompat Cepat:</span>
+                        <button onclick="EggApp.jumpTo('sec-kpi-cards')" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-700 font-bold rounded-xl transition">Ringkasan</button>
+                        <button onclick="EggApp.openAddRecordModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-700 font-bold rounded-xl transition">Input Harian</button>
+                        <button onclick="EggApp.jumpTo('sec-sticky-report')" class="px-3 py-1.5 bg-amber-100/90 hover:bg-amber-200 text-amber-900 font-extrabold rounded-xl transition flex items-center gap-1 shadow-xs"><span>📑</span> Sticky Notes</button>
+                        <button onclick="EggApp.jumpTo('sec-grafik-tren')" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-700 font-bold rounded-xl transition flex items-center gap-1"><span>📊</span> Grafik Tren</button>
+                        <button onclick="EggApp.jumpTo('sec-tabel-recording')" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-700 font-bold rounded-xl transition flex items-center gap-1"><span>📋</span> Tabel</button>
+                        <button onclick="EggApp.switchMainView('cashbook')" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-black border border-emerald-200 rounded-xl transition">Buku Kas & Nota</button>
                     </div>
                 </div>
+            </section>
 
-                <!-- Card Header -->
-                <div class="mb-6">
-                    <h2 class="text-xl sm:text-2xl font-black text-[#5c2807] uppercase tracking-wide">
-                        LAPORAN RECORDING PETERNAKAN AYAM
-                    </h2>
-                    <p id="card-farm-subtitle" class="text-xs sm:text-sm text-[#873e0e] font-bold mt-1">
-                        Peternakan Barokah Layer Farm • Kandang A - Lohmann Brown
-                    </p>
-                </div>
-
-                <!-- 6 Metric Cards Grid (Persis Screenshot) -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 mb-5">
+            <!-- 2. 12 KPI SUMMARY CARDS (PERSIS SCREENSHOT 1: 2 ROWS X 6 COLS) -->
+            <section id="sec-kpi-cards" class="space-y-3.5">
+                <!-- Baris 1: 6 Kartu Utama dengan Garis Aksen Berwarna -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
                     
-                    <!-- 1. POPULASI AKHIR -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">POPULASI AKHIR</span>
+                    <!-- 1. AYAM AWAL (Aksen Biru) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#0284c7]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AYAM AWAL</span>
                         <div class="my-1.5">
-                            <span id="metric-populasi-akhir" class="text-xl sm:text-2xl font-black text-gray-900">30 Ekor</span>
+                            <span id="kpi-ayam-awal" class="text-xl sm:text-2xl font-black text-slate-900">31</span>
+                            <span class="text-sm font-bold text-slate-600"> ekor</span>
                         </div>
-                        <span id="metric-populasi-sub" class="text-[11px] text-gray-500 font-medium">Mati: 0 • Afkir: 1</span>
+                        <span class="text-[11px] text-slate-400 font-medium">Populasi awal bulan</span>
                     </div>
 
-                    <!-- 2. TOTAL PAKAN -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL PAKAN</span>
+                    <!-- 2. AYAM AKHIR (Aksen Teal) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#0d9488]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AYAM AKHIR</span>
                         <div class="my-1.5">
-                            <span id="metric-total-pakan" class="text-xl sm:text-2xl font-black text-[#1d4ed8]">44,64 Kg</span>
+                            <span id="kpi-ayam-akhir" class="text-xl sm:text-2xl font-black text-slate-900">30</span>
+                            <span class="text-sm font-bold text-slate-600"> ekor</span>
                         </div>
-                        <span id="metric-pakan-sub" class="text-[11px] text-gray-500 font-medium">122,3 gr/ekor</span>
+                        <span id="kpi-sub-ayam-akhir" class="text-[11px] text-slate-500 font-medium">Mati: 0 • Afkir: 1</span>
                     </div>
 
-                    <!-- 3. TOTAL TELUR -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL TELUR</span>
+                    <!-- 3. AFKIR & MATI (Aksen Merah) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#e11d48]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AFKIR & MATI</span>
                         <div class="my-1.5">
-                            <span id="metric-total-telur" class="text-xl sm:text-2xl font-black text-[#b45309]">279 Butir</span>
+                            <span id="kpi-afkir-mati" class="text-xl sm:text-2xl font-black text-rose-600">1</span>
+                            <span class="text-sm font-bold text-rose-600"> ekor</span>
                         </div>
-                        <span id="metric-telur-sub" class="text-[11px] text-gray-500 font-medium">277 Utuh • 2 Retak</span>
+                        <span id="kpi-sub-mortalitas" class="text-[11px] text-slate-400 font-medium">Mortalitas: 0,0%</span>
                     </div>
 
-                    <!-- 4. BERAT TELUR -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BERAT TELUR</span>
+                    <!-- 4. TOTAL PAKAN (Aksen Indigo/Ungu) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#6366f1]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL PAKAN</span>
                         <div class="my-1.5">
-                            <span id="metric-berat-telur" class="text-xl sm:text-2xl font-black text-[#059669]">17,95 Kg</span>
+                            <span id="kpi-total-pakan" class="text-xl sm:text-2xl font-black text-indigo-700">44,64</span>
+                            <span class="text-sm font-bold text-indigo-600"> kg</span>
                         </div>
-                        <span id="metric-berat-sub" class="text-[11px] text-gray-500 font-medium">Rata: 23,3 btr/hari</span>
+                        <span id="kpi-sub-pakan" class="text-[11px] text-slate-500 font-medium">122,3 gr/ekor/hari</span>
                     </div>
 
-                    <!-- 5. RATA-RATA HD -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">RATA-RATA HD</span>
+                    <!-- 5. TOTAL TELUR (Aksen Oranye/Amber) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#f59e0b]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL TELUR</span>
                         <div class="my-1.5">
-                            <span id="metric-rata-hd" class="text-xl sm:text-2xl font-black text-[#059669]">76,43%</span>
+                            <span id="kpi-total-telur" class="text-xl sm:text-2xl font-black text-amber-700">279</span>
+                            <span class="text-sm font-bold text-amber-600"> butir</span>
                         </div>
-                        <span id="metric-hd-sub" class="text-[11px] text-gray-500 font-medium">Target: 80%</span>
+                        <span id="kpi-sub-telur" class="text-[11px] text-slate-500 font-medium">Utuh: 277 • Retak: 2</span>
                     </div>
 
-                    <!-- 6. FCR RATIO -->
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">FCR RATIO</span>
+                    <!-- 6. TOTAL BERAT TELUR (Aksen Hijau Emerald) -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-0 left-0 w-12 h-1.5 rounded-br-full bg-[#10b981]"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL BERAT TELUR</span>
                         <div class="my-1.5">
-                            <span id="metric-fcr-ratio" class="text-xl sm:text-2xl font-black text-[#d97706]">2,49</span>
+                            <span id="kpi-total-berat" class="text-xl sm:text-2xl font-black text-emerald-700">17,95</span>
+                            <span class="text-sm font-bold text-emerald-600"> kg</span>
                         </div>
-                        <span id="metric-fcr-sub" class="text-[11px] text-gray-500 font-medium">EW: 64,3 gr/btr</span>
+                        <span class="text-[11px] text-slate-400 font-medium">Akumulasi bobot panen</span>
                     </div>
 
                 </div>
 
-                <!-- Dark Bottom Bar (Persis Screenshot) -->
-                <div class="sticky-dark-bar p-4 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                <!-- Baris 2: 6 Kartu Rasio & Performa Finansial -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
+                    
+                    <!-- 7. RATA TELUR/HARI -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">RATA TELUR/HARI</span>
+                        <div class="my-1.5">
+                            <span id="kpi-rata-telur" class="text-xl sm:text-2xl font-black text-slate-800">23,3</span>
+                            <span class="text-sm font-bold text-slate-600"> butir</span>
+                        </div>
+                        <span id="kpi-sub-hari" class="text-[11px] text-slate-400 font-medium">12 hari recording</span>
+                    </div>
+
+                    <!-- 8. RATA-RATA HD -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">RATA-RATA HD</span>
+                        <div class="my-1.5">
+                            <span id="kpi-rata-hd" class="text-xl sm:text-2xl font-black text-emerald-600">76,43%</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-medium">Hen Day Production</span>
+                    </div>
+
+                    <!-- 9. RATA-RATA EW -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">RATA-RATA EW</span>
+                        <div class="my-1.5">
+                            <span id="kpi-rata-ew" class="text-xl sm:text-2xl font-black text-slate-800">64,3</span>
+                            <span class="text-sm font-bold text-slate-600"> gr/butir</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-medium">Egg Weight (Bobot Telur)</span>
+                    </div>
+
+                    <!-- 10. FCR KESELURUHAN -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">FCR KESELURUHAN</span>
+                        <div class="my-1.5">
+                            <span id="kpi-fcr" class="text-xl sm:text-2xl font-black text-slate-800">2,49</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-medium">Feed Conversion Ratio</span>
+                    </div>
+
+                    <!-- 11. HPP RATA-RATA/KG -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HPP RATA-RATA/KG</span>
+                        <div class="my-1.5">
+                            <span id="kpi-hpp" class="text-xl sm:text-2xl font-black text-slate-900">Rp 18.403</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-medium">Biaya pakan per kg telur</span>
+                    </div>
+
+                    <!-- 12. ESTIMASI LABA PAKAN -->
+                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ESTIMASI LABA PAKAN</span>
+                        <div class="my-1.5">
+                            <span id="kpi-laba" class="text-xl sm:text-2xl font-black text-emerald-600">Rp 120.209</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-medium">Pendapatan - Biaya Pakan</span>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 3. STICKY NOTES REKAPAN (MINGGUAN & BULANAN) (PERSIS SCREENSHOT 1) -->
+            <section id="sec-sticky-report" class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <span class="text-[10px] font-extrabold uppercase text-amber-300 tracking-wider block">ESTIMASI LABA KOTOR PAKAN</span>
-                        <div class="flex items-baseline gap-2 mt-0.5">
-                            <span id="metric-laba-kotor" class="text-xl sm:text-2xl font-black text-[#22c55e]">Rp 120.209</span>
-                        </div>
-                        <span id="metric-laba-sub" class="text-[11px] text-amber-200/90 font-medium block">
-                            Pendapatan (Rp 450.545) - Biaya (Rp 330.336)
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span>📑</span>
+                            <span>Sticky Notes Rekapan (Mingguan & Bulanan)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Format ringkas siap dibagikan ke WhatsApp Group peternak atau diunduh sebagai gambar PNG.
+                        </p>
+                    </div>
+
+                    <!-- Weekly Filter Pills (Persis Screenshot 1) -->
+                    <div class="flex flex-wrap items-center p-1 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
+                        <button id="sticky-tab-all" onclick="EggApp.setStickyFilter('all')" class="px-3.5 py-1.5 rounded-xl bg-white text-slate-900 shadow-xs font-extrabold transition">Rekap Bulanan</button>
+                        <button id="sticky-tab-w1" onclick="EggApp.setStickyFilter('w1')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium">Minggu 1</button>
+                        <button id="sticky-tab-w2" onclick="EggApp.setStickyFilter('w2')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium">Minggu 2</button>
+                        <button id="sticky-tab-w3" onclick="EggApp.setStickyFilter('w3')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium">Minggu 3</button>
+                        <button id="sticky-tab-w4" onclick="EggApp.setStickyFilter('w4')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium">Minggu 4</button>
+                        <button id="sticky-tab-w5" onclick="EggApp.setStickyFilter('w5')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition font-medium">Minggu 5</button>
+                    </div>
+                </div>
+
+                <!-- Kartu Sticky Note Kuning -->
+                <div class="sticky-report-card rounded-3xl p-6 sm:p-8 relative max-w-4xl mx-auto">
+                    <!-- Orange Sticky Pin Icon 📌 -->
+                    <div class="sticky-pin" title="Sticky Note Laporan Siap Bagikan">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.707 3.293a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414l2.586 2.586L4 14v2h2l2.707-2.879 2.586 2.586a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-7-7z"/></svg>
+                    </div>
+
+                    <!-- Top Badges -->
+                    <div class="flex items-center justify-between pr-12 mb-3">
+                        <span id="card-period-badge" class="bg-amber-200/80 text-amber-900 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wide">
+                            REKAP BULANAN SEPTEMBER 2026 • SEPTEMBER 2026
                         </span>
+                        <div class="text-[11px] text-amber-800 font-semibold hidden sm:block">
+                            EggPro Recorder • <span class="text-emerald-700 font-bold">Status: Aktif</span>
+                        </div>
                     </div>
 
-                    <div class="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-white/10 w-full sm:w-auto">
-                        <span class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider block">HPP PAKAN RATA-RATA</span>
-                        <span id="metric-hpp-pakan" class="text-base sm:text-lg font-black text-white block mt-0.5">Rp 18.403 /kg</span>
+                    <!-- Card Header -->
+                    <div class="mb-6">
+                        <h2 class="text-xl sm:text-2xl font-black text-[#5c2807] uppercase tracking-wide">
+                            LAPORAN RECORDING PETERNAKAN AYAM
+                        </h2>
+                        <p id="card-farm-subtitle" class="text-xs sm:text-sm text-[#873e0e] font-bold mt-1">
+                            Peternakan Barokah Layer Farm • Kandang A - Lohmann Brown
+                        </p>
+                    </div>
+
+                    <!-- 6 Metric Cards Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 mb-5">
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">POPULASI AKHIR</span>
+                            <div class="my-1.5">
+                                <span id="metric-populasi-akhir" class="text-xl sm:text-2xl font-black text-gray-900">30 Ekor</span>
+                            </div>
+                            <span id="metric-populasi-sub" class="text-[11px] text-gray-500 font-medium">Mati: 0 • Afkir: 1</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL PAKAN</span>
+                            <div class="my-1.5">
+                                <span id="metric-total-pakan" class="text-xl sm:text-2xl font-black text-[#1d4ed8]">44,64 Kg</span>
+                            </div>
+                            <span id="metric-pakan-sub" class="text-[11px] text-gray-500 font-medium">122,3 gr/ekor</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TOTAL TELUR</span>
+                            <div class="my-1.5">
+                                <span id="metric-total-telur" class="text-xl sm:text-2xl font-black text-[#b45309]">279 Butir</span>
+                            </div>
+                            <span id="metric-telur-sub" class="text-[11px] text-gray-500 font-medium">277 Utuh • 2 Retak</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BERAT TELUR</span>
+                            <div class="my-1.5">
+                                <span id="metric-berat-telur" class="text-xl sm:text-2xl font-black text-[#059669]">17,95 Kg</span>
+                            </div>
+                            <span id="metric-berat-sub" class="text-[11px] text-gray-500 font-medium">Rata: 23,3 btr/hari</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">RATA-RATA HD</span>
+                            <div class="my-1.5">
+                                <span id="metric-rata-hd" class="text-xl sm:text-2xl font-black text-[#059669]">76,43%</span>
+                            </div>
+                            <span id="metric-hd-sub" class="text-[11px] text-gray-500 font-medium">Target: 80%</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100/60 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">FCR RATIO</span>
+                            <div class="my-1.5">
+                                <span id="metric-fcr-ratio" class="text-xl sm:text-2xl font-black text-[#d97706]">2,49</span>
+                            </div>
+                            <span id="metric-fcr-sub" class="text-[11px] text-gray-500 font-medium">EW: 64,3 gr/btr</span>
+                        </div>
+                    </div>
+
+                    <!-- Dark Bottom Bar -->
+                    <div class="sticky-dark-bar p-4 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-amber-300 tracking-wider block">ESTIMASI LABA KOTOR PAKAN</span>
+                            <div class="flex items-baseline gap-2 mt-0.5">
+                                <span id="metric-laba-kotor" class="text-xl sm:text-2xl font-black text-[#22c55e]">Rp 120.209</span>
+                            </div>
+                            <span id="metric-laba-sub" class="text-[11px] text-amber-200/90 font-medium block">
+                                Pendapatan (Rp 450.545) - Biaya (Rp 330.336)
+                            </span>
+                        </div>
+
+                        <div class="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-white/10 w-full sm:w-auto">
+                            <span class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider block">HPP PAKAN RATA-RATA</span>
+                            <span id="metric-hpp-pakan" class="text-base sm:text-lg font-black text-white block mt-0.5">Rp 18.403 /kg</span>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-        </section>
+                <!-- Action Toolbar Bawah Sticky Note -->
+                <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="EggApp.openAddRecordModal()" class="flex items-center gap-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95">
+                            <span>➕</span>
+                            <span>Catat Recording Hari Ini</span>
+                        </button>
+                        <button onclick="EggApp.copyWhatsappFormat()" class="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95">
+                            <span>📲</span>
+                            <span>Salin Format WhatsApp</span>
+                        </button>
+                    </div>
 
-        <!-- ============================================================== -->
-        <!-- ACTION TOOLBAR                                                 -->
-        <!-- ============================================================== -->
-        <section class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="EggApp.openAddRecordModal()" class="flex items-center gap-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition active:scale-95">
-                    <span>➕</span>
-                    <span>Catat Recording Hari Ini</span>
-                </button>
-                <button onclick="EggApp.copyWhatsappFormat()" class="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition active:scale-95">
-                    <span>📲</span>
-                    <span>Salin Format WhatsApp</span>
-                </button>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <button onclick="window.print()" class="px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition">
-                    <span>🖨️ Cetak</span>
-                </button>
-                <button onclick="EggApp.openQrModal()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition">
-                    <span>📱 Scan di HP</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- ============================================================== -->
-        <!-- TABEL DATA RECORDING HARIAN AYAM PETELUR                       -->
-        <!-- ============================================================== -->
-        <section class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Tabel Recording Harian Peternakan</h3>
-                    <p class="text-xs text-gray-500">Pencatatan mati, afkir, pakan, produksi telur utuh/retak, dan efisiensi FCR.</p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                            <span>🖨️ Cetak</span>
+                        </button>
+                        <button onclick="EggApp.openQrModal()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition">
+                            <span>📱 Scan di HP</span>
+                        </button>
+                    </div>
                 </div>
-                <span id="records-count-badge" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">
-                    12 Hari Tercatat
-                </span>
-            </div>
+            </section>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-gray-100/70 border-b border-gray-200 text-gray-600 font-bold uppercase text-[10px] tracking-wider">
-                            <th class="px-4 py-3">Tgl</th>
-                            <th class="px-4 py-3">Mati</th>
-                            <th class="px-4 py-3">Afkir</th>
-                            <th class="px-4 py-3">Populasi</th>
-                            <th class="px-4 py-3">Pakan (Kg)</th>
-                            <th class="px-4 py-3">gr/ekor</th>
-                            <th class="px-4 py-3">Utuh</th>
-                            <th class="px-4 py-3">Retak</th>
-                            <th class="px-4 py-3">Total Butir</th>
-                            <th class="px-4 py-3">Berat (Kg)</th>
-                            <th class="px-4 py-3">HD (%)</th>
-                            <th class="px-4 py-3">FCR</th>
-                            <th class="px-4 py-3 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="daily-table-body" class="divide-y divide-gray-100">
-                        <!-- Di-generate otomatis oleh js/app.js -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <!-- 4. GRAFIK TREN PERFORMA RECORDING (PERSIS SCREENSHOT 2) -->
+            <section id="sec-grafik-tren" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="text-amber-500">📊</span>
+                            <span id="chart-section-title">Grafik Tren Performa Recording (September 2026)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Pantau fluktuasi produksi telur, produktivitas Hen Day (HD), dan efisiensi konversi pakan (FCR).
+                        </p>
+                    </div>
+
+                    <!-- Metric Switcher Buttons (Persis Screenshot 2) -->
+                    <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-bold text-slate-600">
+                        <button
+                            type="button"
+                            id="btn-metric-hd"
+                            onclick="EggApp.switchTrendMetric('hd')"
+                            class="px-3.5 py-1.5 rounded-lg bg-white text-emerald-700 border border-emerald-500/30 shadow-xs font-bold transition"
+                        >
+                            Hen Day (HD %)
+                        </button>
+                        <button
+                            type="button"
+                            id="btn-metric-butir"
+                            onclick="EggApp.switchTrendMetric('butir')"
+                            class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition"
+                        >
+                            Produksi Butir
+                        </button>
+                        <button
+                            type="button"
+                            id="btn-metric-fcr"
+                            onclick="EggApp.switchTrendMetric('fcr')"
+                            class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition"
+                        >
+                            Rasio FCR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Canvas Chart.js -->
+                <div class="relative w-full h-[280px] sm:h-[320px]">
+                    <canvas id="recordingTrendChart"></canvas>
+                </div>
+            </section>
+
+            <!-- 5. TABEL 15 KOLOM RECORDING HARIAN (PERSIS SCREENSHOT 3) -->
+            <section id="sec-tabel-recording" class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div class="p-4 sm:p-5 bg-white border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Tabel Recording Harian Peternakan</h3>
+                        <p class="text-xs text-slate-500">Daftar lengkap 1 s/d 30 hari dengan kalkulasi otomatis HD%, EW, dan FCR.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="records-count-badge" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
+                            12 Hari Tercatat
+                        </span>
+                        <button onclick="EggApp.openAddRecordModal()" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1">
+                            <span>➕</span>
+                            <span>Catat Hari Ini</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                                <th class="px-3.5 py-3 text-center">TGL</th>
+                                <th class="px-3 py-3">HARI</th>
+                                <th class="px-3 py-3 text-center">POPULASI</th>
+                                <th class="px-3 py-3 text-center text-rose-600">M/A</th>
+                                <th class="px-3 py-3 text-right">PAKAN (KG)</th>
+                                <th class="px-3 py-3 text-right">GR/EKOR</th>
+                                <th class="px-3 py-3 text-center">UTUH</th>
+                                <th class="px-3 py-3 text-center text-rose-500">RETAK</th>
+                                <th class="px-3 py-3 text-center">TOTAL (BTR)</th>
+                                <th class="px-3 py-3 text-right">BERAT (KG)</th>
+                                <th class="px-3.5 py-3 text-center">HEN DAY (%)</th>
+                                <th class="px-3 py-3 text-right">EW (GR)</th>
+                                <th class="px-3 py-3 text-right">FCR</th>
+                                <th class="px-4 py-3">CATATAN KHUSUS</th>
+                                <th class="px-3.5 py-3 text-center">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-table-body" class="divide-y divide-slate-100 whitespace-nowrap">
+                            <!-- Di-generate otomatis oleh js/app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </div><!-- End of recordingSection -->
 
         <!-- ============================================================== -->
         <!-- SECTION 2: BUKU KAS & NOTA PENJUALAN TELUR (EGG CASHBOOK)      -->
         <!-- ============================================================== -->
-        <div id="cashbookSection" class="space-y-6 pb-6">
+        <div id="cashbookSection" class="space-y-6 pb-6 hidden">
             <!-- 4 Financial Stat Cards (Desktop & Tablet Optimized) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5">
                 <!-- Total Saldo -->
