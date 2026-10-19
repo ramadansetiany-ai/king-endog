@@ -1382,6 +1382,17 @@ const EggApp = {
                 paidInput.value = total;
             }
         }
+
+        // Berikan highlight visual khusus jika metode bayar adalah Transfer Bank
+        const bankSec = document.getElementById("invoice-bank-section");
+        if (bankSec) {
+            if (method === 'Transfer Bank') {
+                bankSec.className = "p-3 bg-amber-50/90 rounded-2xl border-2 border-amber-500/80 space-y-2 transition-all shadow-sm ring-2 ring-amber-400/20";
+            } else {
+                bankSec.className = "p-3 bg-slate-50 rounded-2xl border border-slate-200/90 space-y-2 transition-all";
+            }
+        }
+
         this.recalculateInvoiceTotals();
     },
 
