@@ -1,5 +1,5 @@
-// King Endog - Service Worker untuk instalasi PWA di HP
-const CACHE_NAME = 'king-endog-v2';
+// King Endog - Service Worker untuk instalasi PWA di HP & Laptop
+const CACHE_NAME = 'king-endog-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -35,7 +35,33 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Network-First strategy untuk file HTML dan JS agar sinkronisasi dan kode selalu terbaru!
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+
+  // Jangan sentuh atau cache request Firebase / external CDN API
+  if (url.origin !== location.origin || url.pathname.includes('/api/')) {
+    return;
+  }
+
+  // Network-First untuk HTML & JS
+  if (url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname === '/' || url.pathname.endsWith('/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const resClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache-First untuk aset gambar / static lainnya
   event.respondWith(
     caches.match(event.request).then(response => {
       return response || fetch(event.request);

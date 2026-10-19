@@ -127,20 +127,31 @@
                     <span class="hidden sm:inline">Contoh</span>
                 </button>
 
-                <!-- 🔄 Reset Data (Red circle/pill) -->
+                <!-- 🔄 Tarik Data Cloud / Refresh Sync -->
+                <button
+                    onclick="EggApp.manualSyncFromCloud()"
+                    id="btn-quick-sync"
+                    class="px-2.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold border border-emerald-400/50 flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+                    title="Tarik data terbaru dari HP / Cloud sekarang"
+                >
+                    <span id="icon-refresh-sync" class="inline-block transition-transform duration-300">🔄</span>
+                    <span class="hidden md:inline">Sinkronkan</span>
+                </button>
+
+                <!-- 🗑️ Reset Data -->
                 <button
                     onclick="EggApp.resetData()"
-                    class="w-8 h-8 sm:w-9 sm:h-9 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center justify-center transition shadow-xs"
+                    class="w-8 h-8 sm:w-9 sm:h-9 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center justify-center transition shadow-xs cursor-pointer"
                     title="Reset / Bersihkan Seluruh Data"
                 >
-                    🔄
+                    🗑️
                 </button>
 
                 <!-- Live Cloud Sync Pill -->
                 <button
                     onclick="EggApp.openCloudSyncModal()"
                     id="btn-cloud-sync"
-                    class="flex items-center gap-1.5 px-2.5 py-1.5 sm:py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 sm:py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95 cursor-pointer"
                     title="Status Sinkronisasi Cloud Multi-Perangkat (HP & Laptop)"
                 >
                     <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -947,10 +958,12 @@
             <div id="cloud-status-card" class="p-4 rounded-2xl border transition bg-amber-50/70 border-amber-200 text-amber-900">
                 <div class="flex items-start gap-3">
                     <div id="cloud-status-dot" class="w-3 h-3 rounded-full bg-amber-500 mt-1 flex-shrink-0 animate-pulse"></div>
-                    <div class="space-y-1 text-xs">
-                        <div class="font-bold flex items-center gap-2">
-                            <span>Status:</span>
-                            <span id="cloud-status-text" class="text-amber-800 font-extrabold">Mode Offline (Belum Terhubung Database Cloud)</span>
+                    <div class="space-y-1 text-xs flex-1">
+                        <div class="font-bold flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <span>Status:</span>
+                                <span id="cloud-status-text" class="text-amber-800 font-extrabold">Mode Offline (Belum Terhubung Database Cloud)</span>
+                            </span>
                         </div>
                         <p id="cloud-status-desc" class="text-[11px] text-amber-800/90 leading-relaxed">
                             Data transaksi saat ini hanya tersimpan di browser perangkat ini. Agar apa yang Anda input di HP <strong>langsung otomatis muncul di Laptop</strong> (dan sebaliknya), hubungkan dengan Firebase Firestore gratis.
@@ -958,6 +971,16 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Tombol Tarik Data Cepat -->
+            <button
+                type="button"
+                onclick="EggApp.manualSyncFromCloud()"
+                class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+                <span>🔄</span>
+                <span>Tarik Data Terbaru dari Cloud / HP Sekarang</span>
+            </button>
 
             <!-- Firebase Config Input Box -->
             <div class="space-y-2.5">
@@ -1466,6 +1489,6 @@
     <div id="toast-box" class="fixed bottom-5 right-5 z-50 max-w-xs w-full pointer-events-none"></div>
 
     <!-- Application Script -->
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=2.2"></script>
 </body>
 </html>

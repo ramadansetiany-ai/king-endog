@@ -1967,6 +1967,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
         isConnected: false,
         lastLocalSaveTime: 0,
         isSyncing: false,
+        isPulling: false,
+        _intervalId: null,
 
         // Konfigurasi Bawaan Resmi Proyek King Endog
         defaultFirebaseConfig: {
@@ -1993,6 +1995,30 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 this.updateStatusUI(false);
                 this.tryLocalServerSync();
             }
+
+            // 3. Pasang auto-sync saat user kembali ke tab browser (focus & visibilitychange)
+            window.addEventListener("focus", () => {
+                this.pullData();
+            });
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    this.pullData();
+                }
+            });
+
+            // 4. Polling ringan tiap 10 detik sebagai jaring pengaman multi-device
+            if (!this._intervalId) {
+                this._intervalId = setInterval(() => {
+                    if (!document.hidden && this.isConnected) {
+                        this.pullData();
+                    }
+                }, 10000);
+            }
+
+            // 5. Segera tarik data perdana dari Cloud secara instan
+            setTimeout(() => {
+                this.pullData(true);
+            }, 100);
         },
 
         getConfig() {
@@ -2036,6 +2062,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 if (!window.firebase) {
                     console.warn("Firebase SDK belum termuat.");
                     this.updateStatusUI(false, "Firebase SDK belum termuat di browser.");
+                    // Tetap coba pull via REST HTTP langsung!
+                    this.pullData(true);
                     return;
                 }
 
@@ -2060,6 +2088,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 console.error("Firebase connection error:", err);
                 this.isConnected = false;
                 this.updateStatusUI(false, "Gagal koneksi: " + err.message);
+                // Fallback pull via direct REST
+                this.pullData(true);
             }
         },
 
@@ -2108,16 +2138,89 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
             });
         },
 
-        applyRemoteData(cloudData) {
-            if (!cloudData) return;
-            if (cloudData.updatedAt && cloudData.updatedAt > this.lastLocalSaveTime) {
+        async pullData(force = false) {
+            if (this.isPulling) return false;
+            this.isPulling = true;
+
+            const iconSync = document.getElementById("icon-refresh-sync");
+            if (iconSync) iconSync.classList.add("animate-spin");
+
+            const config = this.getConfig();
+            const rtdbUrl = (config && config.databaseURL)
+                ? config.databaseURL
+                : this.defaultFirebaseConfig.databaseURL;
+
+            try {
+                // 1. Prioritas REST HTTP (Paling cepat, bypass WebSocket drop / background throttle)
+                const restUrl = `${rtdbUrl.replace(/\/$/, '')}/farm_data.json?t=${Date.now()}`;
+                const resp = await fetch(restUrl, { cache: 'no-store' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && (data.records !== undefined || data.settings !== undefined)) {
+                        const applied = this.applyRemoteData(data, force);
+                        this.isPulling = false;
+                        if (iconSync) iconSync.classList.remove("animate-spin");
+                        return applied;
+                    }
+                }
+            } catch (err) {
+                console.warn("Direct REST pull notice:", err.message);
+            }
+
+            // 2. Fallback Firebase RTDB SDK
+            if (this.rtdb) {
+                try {
+                    const snap = await this.rtdb.ref("farm_data").once("value");
+                    const cloudData = snap.val();
+                    if (cloudData) {
+                        const applied = this.applyRemoteData(cloudData, force);
+                        this.isPulling = false;
+                        if (iconSync) iconSync.classList.remove("animate-spin");
+                        return applied;
+                    }
+                } catch (e) {
+                    console.warn("RTDB once fallback notice:", e.message);
+                }
+            }
+
+            // 3. Fallback server Wi-Fi lokal
+            this.tryLocalServerSync();
+            this.isPulling = false;
+            if (iconSync) iconSync.classList.remove("animate-spin");
+            return false;
+        },
+
+        applyRemoteData(cloudData, force = false) {
+            if (!cloudData) return false;
+
+            const lastSync = parseInt(localStorage.getItem(this.STORAGE_LAST_SYNC) || '0', 10);
+            const remoteTime = cloudData.updatedAt || 0;
+
+            // Jangan timpa jika user baru saja klik Simpan di perangkat INI dalam 2 detik terakhir (kecuali force)
+            const justSavedHere = (Date.now() - this.lastLocalSaveTime < 2500);
+            if (!force && justSavedHere) {
+                return false;
+            }
+
+            const currentRecordsStr = localStorage.getItem(EggApp.STORAGE_RECORDS) || '[]';
+            const incomingRecordsStr = JSON.stringify(cloudData.records || []);
+            const currentSettingsStr = localStorage.getItem(EggApp.STORAGE_SETTINGS) || '{}';
+            const incomingSettingsStr = JSON.stringify(cloudData.settings || {});
+
+            const isDataDifferent = (currentRecordsStr !== incomingRecordsStr) || (currentSettingsStr !== incomingSettingsStr);
+
+            // Terapkan jika:
+            // - force == true (tarik manual atau inisialisasi)
+            // - remoteTime lebih baru dari lastSync
+            // - data berbeda dan ada data cloud yang valid
+            if (force || remoteTime > lastSync || (isDataDifferent && remoteTime > 0)) {
                 this.isSyncing = true;
-                
+
                 if (cloudData.settings) {
-                    localStorage.setItem(EggApp.STORAGE_SETTINGS, JSON.stringify(cloudData.settings));
+                    localStorage.setItem(EggApp.STORAGE_SETTINGS, incomingSettingsStr);
                 }
                 if (Array.isArray(cloudData.records)) {
-                    localStorage.setItem(EggApp.STORAGE_RECORDS, JSON.stringify(cloudData.records));
+                    localStorage.setItem(EggApp.STORAGE_RECORDS, incomingRecordsStr);
                 }
                 if (Array.isArray(cloudData.transactions)) {
                     localStorage.setItem(EggApp.STORAGE_TRANSACTIONS, JSON.stringify(cloudData.transactions));
@@ -2126,18 +2229,27 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                     localStorage.setItem(EggApp.STORAGE_INVOICES, JSON.stringify(cloudData.invoices));
                 }
 
-                this.lastLocalSaveTime = cloudData.updatedAt;
+                if (remoteTime > 0) {
+                    localStorage.setItem(this.STORAGE_LAST_SYNC, remoteTime.toString());
+                    this.lastLocalSaveTime = remoteTime;
+                }
 
-                // Re-render UI
+                // Render ulang seluruh UI
                 EggApp.calculateAndRender();
                 EggApp.renderCashbook();
 
                 const sender = cloudData.updatedBy || "perangkat lain";
-                EggApp.showToast(`🔄 Data otomatis tersinkron dari ${sender}!`, "info");
-                
+                const totalRows = Array.isArray(cloudData.records) ? cloudData.records.length : 0;
+                EggApp.showToast(`🔄 Data berhasil disinkronkan dari ${sender}! (${totalRows} data)`, "success");
+
                 this.updateStatusUI(true, `Tersinkron (${new Date().toLocaleTimeString('id-ID')})`);
-                this.isSyncing = false;
+
+                setTimeout(() => {
+                    this.isSyncing = false;
+                }, 300);
+                return true;
             }
+            return false;
         },
 
         pushData(force = false) {
@@ -2158,6 +2270,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                     updatedBy: deviceName
                 };
 
+                localStorage.setItem(this.STORAGE_LAST_SYNC, this.lastLocalSaveTime.toString());
+
                 // 1. Simpan ke Firebase Realtime Database
                 if (this.rtdb) {
                     this.rtdb.ref("farm_data").set(payload)
@@ -2167,14 +2281,20 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                         .catch(err => {
                             console.warn("RTDB set notice:", err.message);
                         });
+                } else {
+                    // Fallback REST PUT jika SDK belum siap
+                    const config = this.getConfig();
+                    const rtdbUrl = (config && config.databaseURL) ? config.databaseURL : this.defaultFirebaseConfig.databaseURL;
+                    fetch(`${rtdbUrl.replace(/\/$/, '')}/farm_data.json`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).catch(() => {});
                 }
 
                 // 2. Simpan juga ke Firestore
                 if (this.db) {
                     this.db.collection("farms").doc(this.farmDocId).set(payload, { merge: true })
-                        .then(() => {
-                            this.updateStatusUI(true, `Tersimpan ke Cloud (${new Date().toLocaleTimeString('id-ID')})`);
-                        })
                         .catch(err => {
                             console.warn("Firestore set notice:", err.message);
                         });
@@ -2421,6 +2541,24 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 document.execCommand("copy");
                 this.showToast("Link HP berhasil disalin! 📋", "success");
             });
+    },
+
+    async manualSyncFromCloud() {
+        const iconSync = document.getElementById("icon-refresh-sync");
+        if (iconSync) iconSync.classList.add("animate-spin");
+        this.showToast("⏳ Mengambil data terbaru dari Cloud...", "info");
+        try {
+            const updated = await this.cloudSync.pullData(true);
+            if (iconSync) iconSync.classList.remove("animate-spin");
+            if (updated) {
+                this.showToast("✅ Berhasil! Tampilan telah diperbarui dengan data dari HP.", "success");
+            } else {
+                this.showToast("ℹ️ Data di layar sudah sesuai dengan data terbaru di Cloud.", "info");
+            }
+        } catch (err) {
+            if (iconSync) iconSync.classList.remove("animate-spin");
+            this.showToast("⚠️ Gagal menarik data: " + err.message, "error");
+        }
     },
 
     toggleHeaderMenu(event) {
