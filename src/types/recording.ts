@@ -6,6 +6,9 @@ export interface FarmSettings {
   period: string;
   eggPrice: number;
   feedPrice: number;
+  bankName?: string;
+  bankAccount?: string;
+  bankHolder?: string;
 }
 
 export interface DailyRecord {

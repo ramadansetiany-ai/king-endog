@@ -37,7 +37,10 @@ const EggApp = {
         targetHd: 80.0,
         period: "REKAP BULANAN SEPTEMBER 2026",
         eggPrice: 25100, // Rp / kg
-        feedPrice: 7400   // Rp / kg
+        feedPrice: 7400,  // Rp / kg
+        bankName: "BCA",
+        bankAccount: "123-456-7890",
+        bankHolder: "Peternakan Barokah"
     },
 
     // 12 Hari Data Contoh Recording (Persis Screenshot 1, 2, dan 3)
@@ -73,6 +76,9 @@ const EggApp = {
             paidAmount: 450545,
             paymentMethod: "Tunai",
             paymentStatus: "Lunas",
+            bankName: "BCA",
+            bankAccount: "123-456-7890",
+            bankHolder: "Peternakan Barokah",
             notes: "Pelanggan langganan panen mingguan"
         },
         {
@@ -270,6 +276,10 @@ const EggApp = {
     },
 
     // --- LOCAL STORAGE GETTERS & SETTERS ---
+    loadSettings() {
+        return this.getSettings();
+    },
+
     getSettings() {
         try {
             return JSON.parse(localStorage.getItem(this.STORAGE_SETTINGS)) || this.defaultSettings;
@@ -1204,6 +1214,11 @@ const EggApp = {
         const notes = document.getElementById("invoice-notes");
         const method = document.getElementById("invoice-method");
 
+        // Rekening Bank (Pre-fill dari Settings)
+        const invBankName = document.getElementById("invoice-bank-name");
+        const invBankAccount = document.getElementById("invoice-bank-account");
+        const invBankHolder = document.getElementById("invoice-bank-holder");
+
         if (buyerName) buyerName.value = "";
         if (buyerPhone) buyerPhone.value = "";
         if (invoiceDate) invoiceDate.value = today;
@@ -1211,6 +1226,10 @@ const EggApp = {
         if (discount) discount.value = "0";
         if (notes) notes.value = "";
         if (method) method.value = "Tunai";
+
+        if (invBankName) invBankName.value = settings.bankName || "";
+        if (invBankAccount) invBankAccount.value = settings.bankAccount || "";
+        if (invBankHolder) invBankHolder.value = settings.bankHolder || "";
 
         this.invoiceItems = [
             {
@@ -1434,6 +1453,11 @@ const EggApp = {
         const notes = document.getElementById("invoice-notes")?.value.trim() || undefined;
         const isLunas = paidAmount >= finalAmount;
 
+        // Info Rekening Bank Khusus Nota Ini
+        const bankName = document.getElementById("invoice-bank-name")?.value.trim() || undefined;
+        const bankAccount = document.getElementById("invoice-bank-account")?.value.trim() || undefined;
+        const bankHolder = document.getElementById("invoice-bank-holder")?.value.trim() || undefined;
+
         const invoiceId = `INV-${date.replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
 
         const newInvoice = {
@@ -1449,12 +1473,26 @@ const EggApp = {
             paidAmount: paidAmount,
             paymentMethod: method,
             paymentStatus: isLunas ? 'Lunas' : 'Tempo',
+            bankName: bankName,
+            bankAccount: bankAccount,
+            bankHolder: bankHolder,
             notes: notes
         };
 
         const invoices = this.getInvoices();
         invoices.unshift(newInvoice);
         this.saveInvoices(invoices);
+
+        // Jika user mengisi/mengubah rekening saat input nota, perbarui pengaturan agar tersimpan untuk nota selanjutnya
+        if (bankName || bankAccount || bankHolder) {
+            const curSettings = this.getSettings();
+            if (bankName !== curSettings.bankName || bankAccount !== curSettings.bankAccount || bankHolder !== curSettings.bankHolder) {
+                curSettings.bankName = bankName || curSettings.bankName || "";
+                curSettings.bankAccount = bankAccount || curSettings.bankAccount || "";
+                curSettings.bankHolder = bankHolder || curSettings.bankHolder || "";
+                this.saveSettings(curSettings);
+            }
+        }
 
         // Otomatis catat transaksi kas jika ada uang masuk
         if (paidAmount > 0) {
@@ -1559,6 +1597,23 @@ const EggApp = {
 
         this.setText("receipt-notes", invoice.notes ? `Catatan: ${invoice.notes}` : "");
 
+        // Tampilkan info rekening di bagian bawah/footer struk nota
+        const bankName = invoice.bankName || settings.bankName || "";
+        const bankAccount = invoice.bankAccount || settings.bankAccount || "";
+        const bankHolder = invoice.bankHolder || settings.bankHolder || "";
+        const bankBox = document.getElementById("receipt-bank-box");
+
+        if (bankBox) {
+            if (bankAccount || bankName) {
+                bankBox.classList.remove("hidden");
+                this.setText("receipt-bank-name", bankName || "BANK");
+                this.setText("receipt-bank-account", bankAccount || "-");
+                this.setText("receipt-bank-holder", bankHolder || settings.farmName || "-");
+            } else {
+                bankBox.classList.add("hidden");
+            }
+        }
+
         document.getElementById("modal-view-invoice")?.classList.remove("hidden");
         if (window.lucide) lucide.createIcons();
     },
@@ -1576,6 +1631,16 @@ const EggApp = {
         const itemsList = invoice.items.map(it => `• ${it.name} (${it.quantity} ${it.unit}) = ${this.formatRupiah(it.subtotal)}`).join("\n");
         const remaining = Math.max(0, invoice.finalAmount - invoice.paidAmount);
 
+        // Sertakan info transfer bank jika ada
+        const bankName = invoice.bankName || settings.bankName || "";
+        const bankAccount = invoice.bankAccount || settings.bankAccount || "";
+        const bankHolder = invoice.bankHolder || settings.bankHolder || "";
+
+        let bankInfoWa = "";
+        if (bankAccount || bankName) {
+            bankInfoWa = `\n────────────────────────\n💳 *INFO PEMBAYARAN TRANSFER:*\nBank    : *${bankName || '-'}*\nNo. Rek : *${bankAccount || '-'}*\nA/N     : *${bankHolder || '-'}*`;
+        }
+
         const waText =
 `🧾 *NOTA PENJUALAN TELUR SEGAR*
 🏠 *${settings.farmName}*
@@ -1592,7 +1657,7 @@ Subtotal   : ${this.formatRupiah(invoice.subtotal)}${invoice.discount > 0 ? `\nD
 *TOTAL     : ${this.formatRupiah(invoice.finalAmount)}*
 Dibayar    : ${this.formatRupiah(invoice.paidAmount)} (${invoice.paymentMethod})
 Status     : *${invoice.paymentStatus.toUpperCase()}*${remaining > 0 ? `\n*Sisa Tempo : ${this.formatRupiah(remaining)}*` : ''}
-${invoice.notes ? `\nCatatan: ${invoice.notes}` : ''}
+${invoice.notes ? `\nCatatan: ${invoice.notes}` : ''}${bankInfoWa}
 ────────────────────────
 _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
 
@@ -1730,8 +1795,14 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
         document.getElementById("setting-period").value = settings.period;
         document.getElementById("setting-egg-price").value = settings.eggPrice;
         document.getElementById("setting-feed-price").value = settings.feedPrice;
+        
+        // Rekening Bank
+        document.getElementById("setting-bank-name").value = settings.bankName || "";
+        document.getElementById("setting-bank-account").value = settings.bankAccount || "";
+        document.getElementById("setting-bank-holder").value = settings.bankHolder || "";
 
         document.getElementById("modal-farm-settings")?.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
     },
 
     closeFarmSettingsModal() {
@@ -1747,6 +1818,10 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
         const eggPrice = parseFloat(document.getElementById("setting-egg-price")?.value) || this.defaultSettings.eggPrice;
         const feedPrice = parseFloat(document.getElementById("setting-feed-price")?.value) || this.defaultSettings.feedPrice;
 
+        const bankName = document.getElementById("setting-bank-name")?.value.trim() || "";
+        const bankAccount = document.getElementById("setting-bank-account")?.value.trim() || "";
+        const bankHolder = document.getElementById("setting-bank-holder")?.value.trim() || "";
+
         this.saveSettings({
             farmName,
             coopName,
@@ -1754,13 +1829,16 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
             targetHd,
             period,
             eggPrice,
-            feedPrice
+            feedPrice,
+            bankName,
+            bankAccount,
+            bankHolder
         });
 
         this.closeFarmSettingsModal();
         this.calculateAndRender();
         this.renderCashbook();
-        this.showToast("Pengaturan data peternakan diperbarui!", "success");
+        this.showToast("Pengaturan data peternakan & rekening bank diperbarui!", "success");
     },
 
     // ==============================================================

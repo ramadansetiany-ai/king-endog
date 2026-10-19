@@ -39,4 +39,7 @@ export interface SalesInvoice {
   paymentMethod: PaymentMethod;
   paymentStatus: InvoicePaymentStatus;
   notes?: string;
+  bankName?: string;
+  bankAccount?: string;
+  bankHolder?: string;
 }
