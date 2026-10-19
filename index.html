@@ -59,50 +59,110 @@
     <!-- TOP ORANGE HEADER (PERSIS SESUAI SCREENSHOT AISTUDIO)          -->
     <!-- ============================================================== -->
     <!-- Top Header -->
-    <header class="bg-[#d97706] text-white px-4 sm:px-8 py-3.5 shadow-md sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+    <header class="bg-[#d97706] text-white px-4 sm:px-8 py-3 shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
             
-            <!-- Logo & Title -->
-            <div class="flex items-center gap-3.5 w-full md:w-auto">
-                <div class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow flex-shrink-0">
-                    <div class="w-6 h-7 rounded-full bg-amber-500 transform rotate-12 flex items-center justify-center text-white text-xs font-bold">
-                        🥚
-                    </div>
-                </div>
+            <!-- Logo Baru (Ayam Mahkota 3D) & Title -->
+            <div class="flex items-center gap-3">
+                <img src="icons/logo.png" alt="Logo King Endog" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl object-cover shadow-md border border-amber-300/40 flex-shrink-0 bg-emerald-950" />
                 <div>
-                    <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
-                        King Endog - Sistem Peternakan & Kasir Pro
+                    <h1 class="text-base sm:text-lg font-black tracking-tight leading-tight flex items-center gap-1.5">
+                        <span>King Endog</span>
+                        <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-amber-800/80 border border-amber-400/40 text-amber-200">PRO</span>
                     </h1>
-                    <p class="text-xs text-amber-100 font-medium">
-                        Rekap Recording Harian, Buku Kas Keuangan & Nota Penjualan Telur
+                    <p class="text-[11px] text-amber-100 font-medium hidden sm:block">
+                        Rekap Recording Harian, Buku Kas Keuangan & Nota Penjualan
                     </p>
                 </div>
             </div>
 
-            <!-- Top Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                <!-- Tombol Sinkron Cloud HP & Laptop -->
-                <button onclick="EggApp.openCloudSyncModal()" id="btn-cloud-sync" class="flex items-center gap-1.5 px-3 py-2 bg-amber-900/80 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/50 transition shadow-xs active:scale-95" title="Sinkronisasi Cloud Real-time HP & Laptop">
-                    <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                    <span id="cloud-sync-text">☁️ Sinkron HP & Laptop</span>
+            <!-- Top Right: Live Cloud Status Badge + Dropdown Menu Rapi -->
+            <div class="flex items-center gap-2">
+                <!-- Pill Status Sinkron Cloud (Klik untuk buka detail) -->
+                <button
+                    onclick="EggApp.openCloudSyncModal()"
+                    id="btn-cloud-sync"
+                    class="flex items-center gap-1.5 px-3 py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95"
+                    title="Status Sinkronisasi Cloud Multi-Perangkat"
+                >
+                    <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="cloud-sync-text" class="text-xs font-bold">Cloud Aktif</span>
                 </button>
-                <button onclick="EggApp.openFarmSettingsModal()" class="flex items-center gap-1.5 px-3 py-2 bg-amber-700/80 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold border border-amber-500/60 transition shadow-xs active:scale-95">
-                    <span>⚙️</span>
-                    <span>Pengaturan Farm</span>
-                </button>
-                <button onclick="EggApp.loadSampleData()" class="flex items-center gap-1.5 px-3 py-2 bg-amber-700/80 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold border border-amber-500/60 transition shadow-xs active:scale-95">
-                    <span>📄</span>
-                    <span>Muat Data Contoh</span>
-                </button>
-                <button onclick="EggApp.resetData()" class="flex items-center gap-1.5 px-3 py-2 bg-[#b91c1c] hover:bg-red-800 text-white rounded-xl text-xs font-semibold transition shadow-xs active:scale-95">
-                    <span>🔄</span>
-                    <span>Reset Data</span>
-                </button>
-                <!-- Tombol Buka di HP / APK -->
-                <button onclick="EggApp.openQrModal()" class="flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold shadow-xs transition active:scale-95" title="Buka di HP lewat Wi-Fi">
-                    <span>📱</span>
-                    <span>Buka di HP</span>
-                </button>
+
+                <!-- Tombol Dropdown Menu Tunggal yang Rapi -->
+                <div class="relative" id="dropdown-menu-wrapper">
+                    <button
+                        type="button"
+                        id="btn-header-menu"
+                        onclick="EggApp.toggleHeaderMenu(event)"
+                        class="flex items-center gap-1.5 px-3 py-2 bg-amber-800 hover:bg-amber-900 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-400/50 transition shadow-xs cursor-pointer"
+                        title="Buka Menu & Pengaturan"
+                    >
+                        <i data-lucide="menu" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Menu</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-80"></i>
+                    </button>
+
+                    <!-- Dropdown Content Popover -->
+                    <div
+                        id="header-dropdown-menu"
+                        class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 py-1.5 z-50 text-slate-700 text-xs font-medium"
+                    >
+                        <div class="px-3.5 py-1.5 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Menu & Pengaturan
+                        </div>
+
+                        <button onclick="EggApp.openCloudSyncModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
+                            <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-sm shadow-xs">☁️</span>
+                            <div>
+                                <div class="font-bold text-slate-800">Sinkron Cloud HP & Laptop</div>
+                                <div class="text-[10px] text-slate-400">Database Firebase Real-time</div>
+                            </div>
+                        </button>
+
+                        <button onclick="EggApp.openFarmSettingsModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
+                            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm shadow-xs">⚙️</span>
+                            <div>
+                                <div class="font-bold text-slate-800">Pengaturan Farm & Harga</div>
+                                <div class="text-[10px] text-slate-400">Nama kandang, harga pakan/telur</div>
+                            </div>
+                        </button>
+
+                        <button onclick="EggApp.openQrModal(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
+                            <span class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center text-sm shadow-xs">📱</span>
+                            <div>
+                                <div class="font-bold text-slate-800">Buka di HP (QR Code)</div>
+                                <div class="text-[10px] text-slate-400">Akses langsung dari smartphone</div>
+                            </div>
+                        </button>
+
+                        <button onclick="EggApp.exportDataBackup(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2.5 hover:bg-amber-50 flex items-center gap-2.5 transition">
+                            <span class="w-7 h-7 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-sm shadow-xs">💾</span>
+                            <div>
+                                <div class="font-bold text-slate-800">Unduh Backup Data (JSON)</div>
+                                <div class="text-[10px] text-slate-400">Simpan cadangan ke laptop</div>
+                            </div>
+                        </button>
+
+                        <div class="my-1 border-t border-slate-100"></div>
+
+                        <button onclick="EggApp.loadSampleData(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2.5 transition text-slate-600">
+                            <span class="w-7 h-7 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm shadow-xs">📄</span>
+                            <div>
+                                <div class="font-semibold text-slate-700">Muat Data Contoh</div>
+                                <div class="text-[10px] text-slate-400">Isi data simulasi Barokah Farm</div>
+                            </div>
+                        </button>
+
+                        <button onclick="EggApp.resetData(); EggApp.closeHeaderMenu();" class="w-full text-left px-3.5 py-2 hover:bg-rose-50 flex items-center gap-2.5 transition text-rose-600">
+                            <span class="w-7 h-7 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm shadow-xs">🔄</span>
+                            <div>
+                                <div class="font-bold text-rose-600">Reset Semua Data</div>
+                                <div class="text-[10px] text-rose-400">Hapus semua transaksi & catatan</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>

@@ -390,6 +390,7 @@ const EggApp = {
         document.getElementById("modal-add-record")?.classList.add("hidden");
         document.getElementById("modal-qr")?.classList.add("hidden");
         document.getElementById("modal-cloud-sync")?.classList.add("hidden");
+        this.closeHeaderMenu();
     },
 
     // ==============================================================
@@ -2048,6 +2049,18 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 document.execCommand("copy");
                 this.showToast("Link HP berhasil disalin! 📋", "success");
             });
+    },
+
+    toggleHeaderMenu(event) {
+        if (event) event.stopPropagation();
+        const menu = document.getElementById("header-dropdown-menu");
+        if (menu) {
+            menu.classList.toggle("hidden");
+        }
+    },
+
+    closeHeaderMenu() {
+        document.getElementById("header-dropdown-menu")?.classList.add("hidden");
     }
 };
 
@@ -2057,9 +2070,17 @@ document.addEventListener("DOMContentLoaded", () => {
     EggApp.init();
 });
 
-// Shortcut Keyboard Desktop: Tombol Escape untuk menutup modal
+// Shortcut Keyboard Desktop: Tombol Escape untuk menutup modal & menu
 window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         EggApp.closeAllModals();
+    }
+});
+
+// Tutup dropdown menu jika klik di luar
+window.addEventListener("click", (e) => {
+    const wrapper = document.getElementById("dropdown-menu-wrapper");
+    if (wrapper && !wrapper.contains(e.target)) {
+        EggApp.closeHeaderMenu();
     }
 });
