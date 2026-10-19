@@ -77,86 +77,104 @@
                 </div>
             </div>
 
-            <!-- Right: Action Buttons (Persis Screenshot 1) -->
-            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <!-- Tab View Switcher -->
-                <button
-                    id="header-tab-recording"
-                    onclick="EggApp.switchMainView('recording')"
-                    class="px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95"
-                >
-                    <span>📄</span>
-                    <span>Recording Harian</span>
-                </button>
+            <!-- Right: Action Buttons (Modern, Tidy & Premium) -->
+            <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+                <!-- 1. Segmented Navigation Switcher (Recording | Buku Kas) -->
+                <div class="bg-amber-950/40 p-1 rounded-2xl flex items-center border border-amber-400/20 shadow-inner">
+                    <button
+                        id="header-tab-recording"
+                        onclick="EggApp.switchMainView('recording')"
+                        class="px-3 py-1.5 sm:px-3.5 sm:py-1.5 bg-white text-amber-900 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95"
+                    >
+                        <span>📄</span>
+                        <span class="hidden sm:inline">Recording</span>
+                        <span class="sm:hidden">Catat</span>
+                    </button>
 
-                <button
-                    id="header-tab-cashbook"
-                    onclick="EggApp.switchMainView('cashbook')"
-                    class="px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95"
-                >
-                    <span>🧾</span>
-                    <span>Buku Kas & Nota</span>
-                </button>
+                    <button
+                        id="header-tab-cashbook"
+                        onclick="EggApp.switchMainView('cashbook')"
+                        class="px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-amber-100 hover:text-white hover:bg-white/10 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                    >
+                        <span>🧾</span>
+                        <span class="hidden sm:inline">Buku Kas & Nota</span>
+                        <span class="sm:hidden">Kas</span>
+                    </button>
+                </div>
 
-                <!-- + Nota Telur (Green Button) -->
+                <!-- 2. + Nota Telur (Vibrant Quick Action) -->
                 <button
                     onclick="EggApp.openCreateInvoiceModal()"
-                    class="px-3.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                    class="px-3 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs flex items-center gap-1 transition"
                     title="Buat Nota Penjualan Telur Baru"
                 >
                     <span class="text-sm font-black">+</span>
-                    <span>Nota Telur</span>
+                    <span class="hidden sm:inline">Nota Telur</span>
+                    <span class="sm:hidden">Nota</span>
                 </button>
 
-                <!-- ⚙️ Settings -->
-                <button
-                    onclick="EggApp.openFarmSettingsModal()"
-                    class="w-8 h-8 sm:w-9 sm:h-9 bg-amber-800/80 hover:bg-amber-800 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center justify-center transition"
-                    title="Pengaturan Peternakan & Kandang"
-                >
-                    ⚙️
-                </button>
-
-                <!-- 📄 Contoh Data -->
-                <button
-                    onclick="EggApp.loadSampleData()"
-                    class="px-2.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center gap-1 transition"
-                    title="Muat Data Contoh Peternakan"
-                >
-                    <span>📄</span>
-                    <span class="hidden sm:inline">Contoh</span>
-                </button>
-
-                <!-- 🔄 Tarik Data Cloud / Refresh Sync -->
+                <!-- 3. Unified Cloud Sync Pill (Status + Quick Sync) -->
                 <button
                     onclick="EggApp.manualSyncFromCloud()"
-                    id="btn-quick-sync"
-                    class="px-2.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold border border-emerald-400/50 flex items-center gap-1.5 transition shadow-xs cursor-pointer"
-                    title="Tarik data terbaru dari HP / Cloud sekarang"
-                >
-                    <span id="icon-refresh-sync" class="inline-block transition-transform duration-300">🔄</span>
-                    <span class="hidden md:inline">Sinkronkan</span>
-                </button>
-
-                <!-- 🗑️ Reset Data -->
-                <button
-                    onclick="EggApp.resetData()"
-                    class="w-8 h-8 sm:w-9 sm:h-9 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center justify-center transition shadow-xs cursor-pointer"
-                    title="Reset / Bersihkan Seluruh Data"
-                >
-                    🗑️
-                </button>
-
-                <!-- Live Cloud Sync Pill -->
-                <button
-                    onclick="EggApp.openCloudSyncModal()"
                     id="btn-cloud-sync"
-                    class="flex items-center gap-1.5 px-2.5 py-1.5 sm:py-2 bg-amber-900/60 hover:bg-amber-900 text-amber-100 rounded-xl text-xs font-semibold border border-amber-400/40 transition shadow-xs active:scale-95 cursor-pointer"
-                    title="Status Sinkronisasi Cloud Multi-Perangkat (HP & Laptop)"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 sm:py-2 bg-amber-950/40 hover:bg-amber-950/60 text-amber-100 rounded-xl text-xs font-bold border border-amber-400/20 transition shadow-xs active:scale-95 cursor-pointer"
+                    title="Status Cloud & Tarik Data Terbaru (Klik untuk Sinkronkan)"
                 >
                     <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="cloud-sync-text" class="text-[11px] font-bold hidden sm:inline">Cloud Aktif</span>
+                    <span id="cloud-sync-text" class="text-[11px] font-bold hidden md:inline">Cloud Aktif</span>
+                    <span id="icon-refresh-sync" class="text-xs transition-transform duration-300">🔄</span>
                 </button>
+
+                <!-- 4. Dropdown Menu (Pengaturan, Hubungkan HP, Contoh Demo, Reset) -->
+                <div class="relative" id="dropdown-menu-wrapper">
+                    <button
+                        id="btn-header-menu"
+                        onclick="EggApp.toggleHeaderMenu(event)"
+                        class="w-8 h-8 sm:w-9 sm:h-9 bg-amber-950/40 hover:bg-amber-950/60 active:scale-95 text-white rounded-xl text-xs font-bold border border-amber-400/20 flex items-center justify-center transition shadow-xs cursor-pointer"
+                        title="Menu Lainnya & Pengaturan"
+                    >
+                        ⚙️
+                    </button>
+
+                    <!-- Dropdown Content Box -->
+                    <div
+                        id="header-dropdown-menu"
+                        class="absolute right-0 mt-2 w-56 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200/80 py-1.5 z-50 hidden transition-all divide-y divide-slate-100"
+                    >
+                        <div class="py-1">
+                            <button
+                                onclick="EggApp.openFarmSettingsModal(); EggApp.closeHeaderMenu();"
+                                class="w-full px-3.5 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-2.5 transition"
+                            >
+                                <span class="text-sm">⚙️</span>
+                                <span>Pengaturan Peternakan</span>
+                            </button>
+                            <button
+                                onclick="EggApp.openCloudSyncModal(); EggApp.closeHeaderMenu();"
+                                class="w-full px-3.5 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-2.5 transition"
+                            >
+                                <span class="text-sm">📱</span>
+                                <span>Hubungkan HP / Scan QR</span>
+                            </button>
+                            <button
+                                onclick="EggApp.loadSampleData(); EggApp.closeHeaderMenu();"
+                                class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-2.5 transition"
+                            >
+                                <span class="text-sm">📄</span>
+                                <span>Muat Data Contoh Demo</span>
+                            </button>
+                        </div>
+                        <div class="py-1">
+                            <button
+                                onclick="EggApp.resetData(); EggApp.closeHeaderMenu();"
+                                class="w-full px-3.5 py-2 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition"
+                            >
+                                <span class="text-sm">🗑️</span>
+                                <span>Reset Seluruh Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -1489,6 +1507,6 @@
     <div id="toast-box" class="fixed bottom-5 right-5 z-50 max-w-xs w-full pointer-events-none"></div>
 
     <!-- Application Script -->
-    <script src="js/app.js?v=2.4"></script>
+    <script src="js/app.js?v=2.5"></script>
 </body>
 </html>

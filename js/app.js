@@ -370,10 +370,10 @@ const EggApp = {
             if (recSec) recSec.classList.add("hidden");
 
             if (headerTabCash) {
-                headerTabCash.className = "px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
+                headerTabCash.className = "px-3 py-1.5 sm:px-3.5 sm:py-1.5 bg-white text-amber-900 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
             }
             if (headerTabRec) {
-                headerTabRec.className = "px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95";
+                headerTabRec.className = "px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-amber-100 hover:text-white hover:bg-white/10 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95";
             }
 
             if (btnCash) btnCash.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold";
@@ -384,10 +384,10 @@ const EggApp = {
             if (recSec) recSec.classList.remove("hidden");
 
             if (headerTabRec) {
-                headerTabRec.className = "px-3.5 py-1.5 sm:py-2 bg-white text-[#b45309] rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
+                headerTabRec.className = "px-3 py-1.5 sm:px-3.5 sm:py-1.5 bg-white text-amber-900 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition active:scale-95";
             }
             if (headerTabCash) {
-                headerTabCash.className = "px-3.5 py-1.5 sm:py-2 bg-amber-800/80 hover:bg-amber-800 text-amber-100 rounded-xl text-xs font-bold border border-amber-500/40 shadow-xs flex items-center gap-1.5 transition active:scale-95";
+                headerTabCash.className = "px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-amber-100 hover:text-white hover:bg-white/10 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95";
             }
 
             if (btnRec) btnRec.className = "px-4 py-2 rounded-xl transition flex items-center gap-2 bg-amber-600 text-white shadow-xs font-bold";
@@ -2381,8 +2381,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
             const shareCard = document.getElementById("cloud-share-hp-card");
 
             if (connected) {
-                if (topDot) topDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-                if (topText) topText.textContent = "🟢 Cloud Terhubung";
+                if (topDot) topDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+                if (topText) topText.textContent = "Cloud Aktif";
                 if (navDot) navDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
                 if (navText) navText.textContent = message || "Cloud Terhubung (Real-time Aktif)";
 
@@ -2396,8 +2396,8 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                 if (btnDisconnect) btnDisconnect.classList.remove("hidden");
                 if (shareCard) shareCard.classList.remove("hidden");
             } else {
-                if (topDot) topDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-                if (topText) topText.textContent = "☁️ Sinkron HP & Laptop";
+                if (topDot) topDot.className = "w-2 h-2 rounded-full bg-amber-400";
+                if (topText) topText.textContent = "Offline";
                 if (navDot) navDot.className = "w-2 h-2 rounded-full bg-amber-500";
                 if (navText) navText.textContent = "Mode Offline (Klik untuk Hubungkan Cloud)";
 
