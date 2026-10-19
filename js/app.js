@@ -505,7 +505,7 @@ const EggApp = {
                     <td class="px-3 py-3 text-center font-semibold text-slate-700">${rec.good}</td>
                     <td class="px-3 py-3 text-center">${retakDisplay}</td>
                     <td class="px-3 py-3 text-center font-black text-slate-900">${totalEggsDay}</td>
-                    <td class="px-3 py-3 text-right font-bold text-emerald-700">${rec.weight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-3 py-3 text-right font-bold text-emerald-700">${rec.weight.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</td>
                     <td class="px-3.5 py-3 text-center">
                         <span class="inline-block px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                             ${hdDay.toFixed(1).replace('.', ',')}%
@@ -563,7 +563,7 @@ const EggApp = {
         this.setText("kpi-total-telur", `${totalEggs}`);
         this.setText("kpi-sub-telur", `Utuh: ${totalGood} • Retak: ${totalCracked}`);
 
-        this.setText("kpi-total-berat", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        this.setText("kpi-total-berat", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`);
 
         this.setText("kpi-rata-telur", `${avgEggsPerDay.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`);
         this.setText("kpi-sub-hari", `${records.length} hari recording`);
@@ -584,7 +584,7 @@ const EggApp = {
         this.setText("metric-total-telur", `${totalEggs} Butir`);
         this.setText("metric-telur-sub", `${totalGood} Utuh • ${totalCracked} Retak`);
 
-        this.setText("metric-berat-telur", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`);
+        this.setText("metric-berat-telur", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} Kg`);
         this.setText("metric-berat-sub", `Rata: ${avgEggsPerDay.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} btr/hari`);
 
         this.setText("metric-rata-hd", `${avgHd.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
@@ -830,7 +830,7 @@ const EggApp = {
         this.setText("metric-pakan-sub", `${gramPerEkorAvg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gr/ekor`);
         this.setText("metric-total-telur", `${totalEggs} Butir`);
         this.setText("metric-telur-sub", `${totalGood} Utuh • ${totalCracked} Retak`);
-        this.setText("metric-berat-telur", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`);
+        this.setText("metric-berat-telur", `${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} Kg`);
         this.setText("metric-berat-sub", `Rata: ${avgEggsPerDay.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} btr/hari`);
         this.setText("metric-rata-hd", `${avgHd.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
         this.setText("metric-hd-sub", `Target: ${settings.targetHd}%`);
@@ -1812,7 +1812,7 @@ _Terima kasih telah berbelanja telur segar langsung dari peternakan kami!_`;
 🐔 *Populasi Akhir:* ${currentPop} Ekor (Mati: ${totalDead} | Afkir: ${totalCull})
 🌾 *Total Pakan:* ${totalFeed.toFixed(2)} Kg (${gramPerEkor.toFixed(1)} gr/ekor)
 🥚 *Total Telur:* ${totalEggs} Butir (${totalGood} Utuh | ${totalCracked} Retak)
-⚖️ *Berat Telur:* ${totalWeight.toFixed(2)} Kg (Rata: ${(totalEggs / days).toFixed(1)} btr/hari)
+⚖️ *Berat Telur:* ${totalWeight.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} Kg (Rata: ${(totalEggs / days).toFixed(1)} btr/hari)
 📈 *Rata-rata HD:* ${avgHd.toFixed(2)}% (Target: ${settings.targetHd}%)
 📊 *FCR Ratio:* ${fcrRatio.toFixed(2)} (EW: ${eggWeightAvg.toFixed(1)} gr/btr)
 ────────────────────────

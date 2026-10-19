@@ -1,5 +1,5 @@
 // King Endog - Service Worker untuk instalasi PWA di HP & Laptop
-const CACHE_NAME = 'king-endog-v4';
+const CACHE_NAME = 'king-endog-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
