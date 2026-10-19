@@ -223,16 +223,18 @@ const EggApp = {
 
     init() {
         this.loadSettings();
-        if (!localStorage.getItem(this.STORAGE_RECORDS)) {
-            this.loadSampleData(false);
-        } else {
-            // Pastikan data buku kas & nota ada
-            if (!localStorage.getItem(this.STORAGE_TRANSACTIONS)) {
-                this.saveCashTransactions(this.defaultTransactions);
-            }
-            if (!localStorage.getItem(this.STORAGE_INVOICES)) {
-                this.saveInvoices(this.defaultInvoices);
-            }
+
+        // Jangan pernah timpa data otomatis dengan sample data saat buka/refresh!
+        // Jika belum ada data sama sekali, siapkan array kosong [].
+        // Data contoh hanya dimuat jika user secara sadar menekan tombol "📄 Contoh".
+        if (localStorage.getItem(this.STORAGE_RECORDS) === null) {
+            localStorage.setItem(this.STORAGE_RECORDS, JSON.stringify([]));
+        }
+        if (localStorage.getItem(this.STORAGE_TRANSACTIONS) === null) {
+            localStorage.setItem(this.STORAGE_TRANSACTIONS, JSON.stringify([]));
+        }
+        if (localStorage.getItem(this.STORAGE_INVOICES) === null) {
+            localStorage.setItem(this.STORAGE_INVOICES, JSON.stringify([]));
         }
         this.calculateAndRender();
         this.renderCashbook();
@@ -2193,35 +2195,52 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
         applyRemoteData(cloudData, force = false) {
             if (!cloudData) return false;
 
-            const lastSync = parseInt(localStorage.getItem(this.STORAGE_LAST_SYNC) || '0', 10);
             const remoteTime = cloudData.updatedAt || 0;
+            const localUpdateTime = parseInt(localStorage.getItem("eggpro_local_updated_at") || '0', 10);
 
-            // Jangan timpa jika user baru saja klik Simpan di perangkat INI dalam 2 detik terakhir (kecuali force)
-            const justSavedHere = (Date.now() - this.lastLocalSaveTime < 2500);
+            // Jangan timpa jika user baru saja klik Simpan di perangkat INI dalam 3 detik terakhir (kecuali force)
+            const justSavedHere = (Date.now() - this.lastLocalSaveTime < 3000);
             if (!force && justSavedHere) {
                 return false;
             }
 
+            // Normalisasi records (jika Firebase menyimpan null/kosong atau dictionary)
+            let incomingRecords = [];
+            if (Array.isArray(cloudData.records)) {
+                incomingRecords = cloudData.records;
+            } else if (cloudData.records && typeof cloudData.records === 'object') {
+                incomingRecords = Object.values(cloudData.records);
+            }
+
             const currentRecordsStr = localStorage.getItem(EggApp.STORAGE_RECORDS) || '[]';
-            const incomingRecordsStr = JSON.stringify(cloudData.records || []);
+            const incomingRecordsStr = JSON.stringify(incomingRecords);
             const currentSettingsStr = localStorage.getItem(EggApp.STORAGE_SETTINGS) || '{}';
             const incomingSettingsStr = JSON.stringify(cloudData.settings || {});
 
             const isDataDifferent = (currentRecordsStr !== incomingRecordsStr) || (currentSettingsStr !== incomingSettingsStr);
 
-            // Terapkan jika:
-            // - force == true (tarik manual atau inisialisasi)
-            // - remoteTime lebih baru dari lastSync
-            // - data berbeda dan ada data cloud yang valid
-            if (force || remoteTime > lastSync || (isDataDifferent && remoteTime > 0)) {
+            // JIKA DATA LOKAL LEBIH BARU DARI CLOUD (misal user baru saja input di HP):
+            // JANGAN TIMPA DATA LOKAL! Malah kirim data lokal ke Cloud agar tersimpan!
+            if (!force && localUpdateTime > remoteTime && remoteTime > 0) {
+                console.log("Data lokal lebih baru dari cloud. Menyinkronkan lokal ke Cloud...");
+                this.pushData();
+                return false;
+            }
+
+            // Terapkan data remote jika:
+            // 1. force == true (klik manual / initial fetch)
+            // 2. remoteTime lebih baru dari localUpdateTime
+            // 3. localUpdateTime masih 0 (perangkat baru) dan ada data di cloud
+            const shouldApply = force || (remoteTime > localUpdateTime) || (localUpdateTime === 0 && (remoteTime > 0 || isDataDifferent));
+
+            if (shouldApply) {
                 this.isSyncing = true;
 
                 if (cloudData.settings) {
                     localStorage.setItem(EggApp.STORAGE_SETTINGS, incomingSettingsStr);
                 }
-                if (Array.isArray(cloudData.records)) {
-                    localStorage.setItem(EggApp.STORAGE_RECORDS, incomingRecordsStr);
-                }
+                localStorage.setItem(EggApp.STORAGE_RECORDS, incomingRecordsStr);
+
                 if (Array.isArray(cloudData.transactions)) {
                     localStorage.setItem(EggApp.STORAGE_TRANSACTIONS, JSON.stringify(cloudData.transactions));
                 }
@@ -2229,17 +2248,17 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
                     localStorage.setItem(EggApp.STORAGE_INVOICES, JSON.stringify(cloudData.invoices));
                 }
 
-                if (remoteTime > 0) {
-                    localStorage.setItem(this.STORAGE_LAST_SYNC, remoteTime.toString());
-                    this.lastLocalSaveTime = remoteTime;
-                }
+                const syncTimestamp = remoteTime > 0 ? remoteTime : Date.now();
+                localStorage.setItem("eggpro_local_updated_at", syncTimestamp.toString());
+                localStorage.setItem(this.STORAGE_LAST_SYNC, syncTimestamp.toString());
+                this.lastLocalSaveTime = syncTimestamp;
 
                 // Render ulang seluruh UI
                 EggApp.calculateAndRender();
                 EggApp.renderCashbook();
 
                 const sender = cloudData.updatedBy || "perangkat lain";
-                const totalRows = Array.isArray(cloudData.records) ? cloudData.records.length : 0;
+                const totalRows = incomingRecords.length;
                 EggApp.showToast(`🔄 Data berhasil disinkronkan dari ${sender}! (${totalRows} data)`, "success");
 
                 this.updateStatusUI(true, `Tersinkron (${new Date().toLocaleTimeString('id-ID')})`);
@@ -2255,54 +2274,55 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
         pushData(force = false) {
             if (this.isSyncing) return;
 
-            // Jika Firebase terhubung
-            if (this.isConnected) {
-                this.lastLocalSaveTime = Date.now();
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                const deviceName = isMobile ? 'HP / Smartphone' : 'Laptop / Komputer';
+            const now = Date.now();
+            this.lastLocalSaveTime = now;
+            localStorage.setItem("eggpro_local_updated_at", now.toString());
+            localStorage.setItem(this.STORAGE_LAST_SYNC, now.toString());
 
-                const payload = {
-                    settings: EggApp.getSettings(),
-                    records: EggApp.getRecords(),
-                    transactions: EggApp.getCashTransactions(),
-                    invoices: EggApp.getInvoices(),
-                    updatedAt: this.lastLocalSaveTime,
-                    updatedBy: deviceName
-                };
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const deviceName = isMobile ? 'HP / Smartphone' : 'Laptop / Komputer';
 
-                localStorage.setItem(this.STORAGE_LAST_SYNC, this.lastLocalSaveTime.toString());
+            const payload = {
+                settings: EggApp.getSettings(),
+                records: EggApp.getRecords(),
+                transactions: EggApp.getCashTransactions(),
+                invoices: EggApp.getInvoices(),
+                updatedAt: now,
+                updatedBy: deviceName
+            };
 
-                // 1. Simpan ke Firebase Realtime Database
-                if (this.rtdb) {
-                    this.rtdb.ref("farm_data").set(payload)
-                        .then(() => {
-                            this.updateStatusUI(true, `Tersimpan ke Cloud (${new Date().toLocaleTimeString('id-ID')})`);
-                        })
-                        .catch(err => {
-                            console.warn("RTDB set notice:", err.message);
-                        });
-                } else {
-                    // Fallback REST PUT jika SDK belum siap
-                    const config = this.getConfig();
-                    const rtdbUrl = (config && config.databaseURL) ? config.databaseURL : this.defaultFirebaseConfig.databaseURL;
-                    fetch(`${rtdbUrl.replace(/\/$/, '')}/farm_data.json`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    }).catch(() => {});
-                }
+            const config = this.getConfig();
+            const rtdbUrl = (config && config.databaseURL) 
+                ? config.databaseURL 
+                : this.defaultFirebaseConfig.databaseURL;
 
-                // 2. Simpan juga ke Firestore
-                if (this.db) {
-                    this.db.collection("farms").doc(this.farmDocId).set(payload, { merge: true })
-                        .catch(err => {
-                            console.warn("Firestore set notice:", err.message);
-                        });
-                }
-            } else {
-                // Fallback ke local Wi-Fi server jika tersedia
-                this.pushLocalServer();
+            // 1. Prioritas Utama: Simpan langsung via HTTP REST PUT (100% Reliable & instan di HP / Mobile)
+            fetch(`${rtdbUrl.replace(/\/$/, '')}/farm_data.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                this.updateStatusUI(true, `Tersimpan ke Cloud (${new Date().toLocaleTimeString('id-ID')})`);
+            }).catch(err => {
+                console.warn("REST PUT notice:", err.message);
+            });
+
+            // 2. Simpan juga via RTDB SDK jika aktif
+            if (this.rtdb) {
+                try {
+                    this.rtdb.ref("farm_data").set(payload).catch(() => {});
+                } catch (e) {}
             }
+
+            // 3. Simpan juga ke Firestore jika aktif
+            if (this.db) {
+                try {
+                    this.db.collection("farms").doc(this.farmDocId).set(payload, { merge: true }).catch(() => {});
+                } catch (e) {}
+            }
+
+            // 4. Simpan ke local server jika terhubung
+            this.pushLocalServer();
         },
 
         tryLocalServerSync() {
