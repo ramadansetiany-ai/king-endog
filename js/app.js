@@ -2066,7 +2066,7 @@ _Laporan dibuat otomatis via EggPro / King Endog App_`;
         let fullUrl = window.location.href.split('#')[0];
         if (isLocal) {
             const port = window.location.port || "3000";
-            fullUrl = `http://192.168.1.19:${port}`;
+            fullUrl = `http://192.168.1.17:${port}`;
         }
 
         const urlEl = document.getElementById("qr-modal-url");
