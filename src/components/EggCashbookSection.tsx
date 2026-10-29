@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownRight, Receipt, Plus, Search, Trash2, Eye, X } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownRight, Receipt, Plus, Search, Trash2, Eye, X, Edit3 } from 'lucide-react';
 import { CashTransaction, SalesInvoice, CashTransactionType } from '../types/cashbook.ts';
 import { FarmSettings } from '../types/recording.ts';
 import { formatRupiah } from '../utils/stickyNoteExport.ts';
@@ -9,6 +9,7 @@ interface EggCashbookSectionProps {
   invoices: SalesInvoice[];
   settings: FarmSettings;
   onAddTransaction: (trx: Omit<CashTransaction, 'id'>) => void;
+  onUpdateTransaction?: (trx: CashTransaction) => void;
   onDeleteTransaction: (id: string) => void;
   onOpenCreateInvoice: () => void;
   onViewInvoice: (invoice: SalesInvoice) => void;
@@ -40,6 +41,7 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
   invoices,
   settings,
   onAddTransaction,
+  onUpdateTransaction,
   onDeleteTransaction,
   onOpenCreateInvoice,
   onViewInvoice,
@@ -51,6 +53,9 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
 
   // Manual Transaction Modal State
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [editingTrxId, setEditingTrxId] = useState<string | null>(null);
+  const [manualDate, setManualDate] = useState('');
+  const [manualTime, setManualTime] = useState('');
   const [manualType, setManualType] = useState<CashTransactionType>('pengeluaran');
   const [manualCategory, setManualCategory] = useState(KATEGORI_PENGELUARAN[0]);
   const [manualAmount, setManualAmount] = useState('');
@@ -102,25 +107,69 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
     );
   });
 
+  const handleOpenAdd = (type: CashTransactionType) => {
+    setEditingTrxId(null);
+    setManualType(type);
+    setManualCategory(type === 'pengeluaran' ? KATEGORI_PENGELUARAN[0] : KATEGORI_PEMASUKAN[0]);
+    setManualAmount('');
+    setManualDesc('');
+    setManualCustomer('');
+    setManualMethod('Tunai');
+    setManualDate(new Date().toISOString().split('T')[0]);
+    setManualTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':'));
+    setIsManualModalOpen(true);
+  };
+
+  const handleEditTransaction = (trx: CashTransaction) => {
+    setEditingTrxId(trx.id);
+    setManualType(trx.type);
+    setManualCategory(trx.category);
+    setManualAmount(trx.amount.toString());
+    setManualDesc(trx.description || '');
+    setManualCustomer(trx.customerName || '');
+    setManualMethod(trx.paymentMethod || 'Tunai');
+    setManualDate(trx.date || new Date().toISOString().split('T')[0]);
+    setManualTime(trx.time || '12:00');
+    setIsManualModalOpen(true);
+  };
+
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseInt(manualAmount.replace(/[^0-9]/g, ''), 10);
     if (!amount || isNaN(amount) || amount <= 0) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const dateVal = manualDate || new Date().toISOString().split('T')[0];
+    const timeVal = manualTime || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
 
-    onAddTransaction({
-      date: today,
-      time: timeNow,
-      type: manualType,
-      category: manualCategory,
-      description: manualDesc.trim() || manualCategory,
-      amount,
-      paymentMethod: manualMethod,
-      customerName: manualCustomer.trim() || undefined,
-    });
+    if (editingTrxId && onUpdateTransaction) {
+      const existing = transactions.find((t) => t.id === editingTrxId);
+      if (existing) {
+        onUpdateTransaction({
+          ...existing,
+          date: dateVal,
+          time: timeVal,
+          type: manualType,
+          category: manualCategory,
+          description: manualDesc.trim() || manualCategory,
+          amount,
+          paymentMethod: manualMethod,
+          customerName: manualCustomer.trim() || undefined,
+        });
+      }
+    } else {
+      onAddTransaction({
+        date: dateVal,
+        time: timeVal,
+        type: manualType,
+        category: manualCategory,
+        description: manualDesc.trim() || manualCategory,
+        amount,
+        paymentMethod: manualMethod,
+        customerName: manualCustomer.trim() || undefined,
+      });
+    }
 
+    setEditingTrxId(null);
     setManualAmount('');
     setManualDesc('');
     setManualCustomer('');
@@ -200,11 +249,7 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
 
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => {
-                setManualType('pengeluaran');
-                setManualCategory(KATEGORI_PENGELUARAN[0]);
-                setIsManualModalOpen(true);
-              }}
+              onClick={() => handleOpenAdd('pengeluaran')}
               className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-medium transition flex items-center space-x-1"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -212,11 +257,7 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
             </button>
 
             <button
-              onClick={() => {
-                setManualType('pemasukan');
-                setManualCategory(KATEGORI_PEMASUKAN[0]);
-                setIsManualModalOpen(true);
-              }}
+              onClick={() => handleOpenAdd('pemasukan')}
               className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-medium transition flex items-center space-x-1"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -358,8 +399,15 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
                             </button>
                           )}
                           <button
+                            onClick={() => handleEditTransaction(trx)}
+                            className="text-amber-600 hover:text-amber-800 hover:bg-amber-50 p-1 rounded transition"
+                            title="Revisi / Edit transaksi"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => onDeleteTransaction(trx.id)}
-                            className="text-slate-300 hover:text-rose-600 p-1 rounded"
+                            className="text-slate-300 hover:text-rose-600 hover:bg-rose-50 p-1 rounded transition"
                             title="Hapus transaksi"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -462,7 +510,13 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
           <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-800">
-                {manualType === 'pemasukan' ? 'Catat Pemasukan Kas' : 'Catat Pengeluaran Kas'}
+                {editingTrxId
+                  ? manualType === 'pemasukan'
+                    ? 'Revisi Pemasukan Kas'
+                    : 'Revisi Pengeluaran Kas'
+                  : manualType === 'pemasukan'
+                  ? 'Catat Pemasukan Kas'
+                  : 'Catat Pengeluaran Kas'}
               </h3>
               <button
                 onClick={() => setIsManualModalOpen(false)}
@@ -498,6 +552,30 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
                 >
                   Pemasukan (Kas Masuk)
                 </button>
+              </div>
+
+              {/* Tanggal & Waktu */}
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Tanggal</label>
+                  <input
+                    type="date"
+                    required
+                    value={manualDate}
+                    onChange={(e) => setManualDate(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Jam</label>
+                  <input
+                    type="time"
+                    required
+                    value={manualTime}
+                    onChange={(e) => setManualTime(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white"
+                  />
+                </div>
               </div>
 
               <div>
@@ -579,7 +657,7 @@ export const EggCashbookSection: React.FC<EggCashbookSectionProps> = ({
                   type="submit"
                   className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition"
                 >
-                  Simpan Transaksi
+                  {editingTrxId ? 'Simpan Revisi' : 'Simpan Transaksi'}
                 </button>
               </div>
             </form>

@@ -1126,19 +1126,30 @@
         </div>
     </div>
 
-    <!-- 4. MODAL CATAT TRANSAKSI KAS MANUAL -->
+    <!-- 4. MODAL CATAT & REVISI TRANSAKSI KAS MANUAL -->
     <div id="modal-manual-transaction" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs hidden">
         <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 id="manual-trx-modal-title" class="text-base font-bold text-slate-800">
-                    Catat Pengeluaran Kas
-                </h3>
+                <div class="flex items-center gap-2">
+                    <div id="manual-trx-icon-box" class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
+                        <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 id="manual-trx-modal-title" class="text-base font-bold text-slate-800">
+                            Catat Pengeluaran Kas
+                        </h3>
+                        <p id="manual-trx-modal-subtitle" class="text-[11px] text-slate-400">Pencatatan kas operasional kandang</p>
+                    </div>
+                </div>
                 <button onclick="EggApp.closeManualTransactionModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <form onsubmit="EggApp.handleManualTransactionSubmit(event)" class="space-y-4 text-xs">
+                <!-- Hidden input untuk ID saat mode Edit/Revisi -->
+                <input type="hidden" id="manual-trx-id" value="" />
+
                 <!-- Type Toggle -->
                 <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl font-bold">
                     <button
@@ -1157,6 +1168,32 @@
                     >
                         Pemasukan (Kas Masuk)
                     </button>
+                </div>
+
+                <!-- Tanggal & Jam Transaksi -->
+                <div class="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Tanggal <span class="text-rose-500 font-bold">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            required
+                            id="manual-trx-date"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium text-xs"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Waktu / Jam <span class="text-rose-500 font-bold">*</span>
+                        </label>
+                        <input
+                            type="time"
+                            required
+                            id="manual-trx-time"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium text-xs"
+                        />
+                    </div>
                 </div>
 
                 <div>
@@ -1227,9 +1264,11 @@
                     </button>
                     <button
                         type="submit"
-                        class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition"
+                        id="btn-save-manual-trx"
+                        class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-1.5"
                     >
-                        Simpan Transaksi
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span id="btn-save-manual-trx-text">Simpan Transaksi</span>
                     </button>
                 </div>
             </form>
@@ -1592,6 +1631,6 @@
     <div id="toast-box" class="fixed bottom-5 right-5 z-50 max-w-xs w-full pointer-events-none"></div>
 
     <!-- Application Script -->
-    <script src="js/app.js?v=2.7"></script>
+    <script src="js/app.js?v=2.8"></script>
 </body>
 </html>

@@ -226,6 +226,7 @@ const EggApp = {
     manualTransactionType: 'pengeluaran',
     invoiceItems: [],
     activeViewingInvoice: null,
+    editingTrxId: null,
 
     init() {
         this.loadSettings();
@@ -434,6 +435,7 @@ const EggApp = {
     },
 
     closeAllModals() {
+        this.editingTrxId = null;
         document.getElementById("modal-manual-transaction")?.classList.add("hidden");
         document.getElementById("modal-create-invoice")?.classList.add("hidden");
         document.getElementById("modal-view-invoice")?.classList.add("hidden");
@@ -972,15 +974,22 @@ const EggApp = {
                                     ${trx.invoiceId ? `
                                         <button
                                             onclick="EggApp.viewInvoiceById('${trx.invoiceId}')"
-                                            class="text-amber-600 hover:text-amber-800 p-1 rounded"
+                                            class="text-amber-600 hover:text-amber-800 hover:bg-amber-50 p-1 rounded transition"
                                             title="Lihat Nota Penjualan"
                                         >
                                             <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
                                         </button>
                                     ` : ''}
                                     <button
+                                        onclick="EggApp.editTransaction('${trx.id}')"
+                                        class="text-amber-600 hover:text-amber-800 hover:bg-amber-50 p-1 rounded transition"
+                                        title="Revisi / Edit Transaksi Kas"
+                                    >
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button
                                         onclick="EggApp.deleteTransaction('${trx.id}')"
-                                        class="text-slate-300 hover:text-rose-600 p-1 rounded"
+                                        class="text-slate-300 hover:text-rose-600 hover:bg-rose-50 p-1 rounded transition"
                                         title="Hapus transaksi"
                                     >
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -1112,49 +1121,136 @@ const EggApp = {
         this.renderCashbook();
     },
 
-    // --- MANUAL TRANSACTION MODAL ---
+    // --- MANUAL TRANSACTION & REVISION MODAL ---
     openManualTransactionModal(type = 'pengeluaran') {
-        this.setManualTransactionType(type);
+        this.editingTrxId = null;
+
+        const idInput = document.getElementById("manual-trx-id");
+        if (idInput) idInput.value = "";
+
+        const subTitle = document.getElementById("manual-trx-modal-subtitle");
+        if (subTitle) subTitle.textContent = "Pencatatan kas operasional kandang";
+
+        const btnSaveText = document.getElementById("btn-save-manual-trx-text");
+        if (btnSaveText) btnSaveText.textContent = "Simpan Transaksi";
+
+        const today = new Date().toISOString().split('T')[0];
+        const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+
+        const dateInput = document.getElementById("manual-trx-date");
+        const timeInput = document.getElementById("manual-trx-time");
         const amountInput = document.getElementById("manual-trx-amount");
         const descInput = document.getElementById("manual-trx-desc");
         const customerInput = document.getElementById("manual-trx-customer");
         const methodSelect = document.getElementById("manual-trx-method");
 
+        if (dateInput) dateInput.value = today;
+        if (timeInput) timeInput.value = timeNow;
         if (amountInput) amountInput.value = "";
         if (descInput) descInput.value = "";
         if (customerInput) customerInput.value = "";
         if (methodSelect) methodSelect.value = "Tunai";
+
+        this.setManualTransactionType(type);
+
+        document.getElementById("modal-manual-transaction")?.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+    },
+
+    editTransaction(id) {
+        const transactions = this.getCashTransactions();
+        const trx = transactions.find(t => t.id === id);
+        if (!trx) {
+            this.showToast("Data transaksi kas tidak ditemukan!", "warning");
+            return;
+        }
+
+        this.editingTrxId = id;
+
+        const idInput = document.getElementById("manual-trx-id");
+        if (idInput) idInput.value = trx.id;
+
+        const subTitle = document.getElementById("manual-trx-modal-subtitle");
+        if (subTitle) subTitle.textContent = `Revisi data transaksi: ${trx.id}`;
+
+        const btnSaveText = document.getElementById("btn-save-manual-trx-text");
+        if (btnSaveText) btnSaveText.textContent = "Simpan Revisi";
+
+        const today = new Date().toISOString().split('T')[0];
+        const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+
+        const dateInput = document.getElementById("manual-trx-date");
+        const timeInput = document.getElementById("manual-trx-time");
+        const amountInput = document.getElementById("manual-trx-amount");
+        const descInput = document.getElementById("manual-trx-desc");
+        const customerInput = document.getElementById("manual-trx-customer");
+        const methodSelect = document.getElementById("manual-trx-method");
+
+        if (dateInput) dateInput.value = trx.date || today;
+        if (timeInput) timeInput.value = trx.time || timeNow;
+        if (amountInput) amountInput.value = trx.amount;
+        if (descInput) descInput.value = trx.description || '';
+        if (customerInput) customerInput.value = trx.customerName || '';
+        if (methodSelect) methodSelect.value = trx.paymentMethod || 'Tunai';
+
+        this.setManualTransactionType(trx.type, trx.category);
 
         document.getElementById("modal-manual-transaction")?.classList.remove("hidden");
         if (window.lucide) lucide.createIcons();
     },
 
     closeManualTransactionModal() {
+        this.editingTrxId = null;
+        const idInput = document.getElementById("manual-trx-id");
+        if (idInput) idInput.value = "";
         document.getElementById("modal-manual-transaction")?.classList.add("hidden");
     },
 
-    setManualTransactionType(type) {
+    setManualTransactionType(type, selectedCategory = null) {
         this.manualTransactionType = type;
         const btnPengeluaran = document.getElementById("btn-trx-type-pengeluaran");
         const btnPemasukan = document.getElementById("btn-trx-type-pemasukan");
         const modalTitle = document.getElementById("manual-trx-modal-title");
+        const iconBox = document.getElementById("manual-trx-icon-box");
         const catSelect = document.getElementById("manual-trx-category");
 
+        const isEditing = !!this.editingTrxId;
+
         if (type === 'pengeluaran') {
-            if (btnPengeluaran) btnPengeluaran.className = "py-2 rounded-lg transition bg-rose-600 text-white shadow-xs";
-            if (btnPemasukan) btnPemasukan.className = "py-2 rounded-lg transition text-slate-600 hover:text-slate-900";
-            if (modalTitle) modalTitle.textContent = "Catat Pengeluaran Kas";
+            if (btnPengeluaran) btnPengeluaran.className = "py-2 rounded-lg transition bg-rose-600 text-white shadow-xs font-bold";
+            if (btnPemasukan) btnPemasukan.className = "py-2 rounded-lg transition text-slate-600 hover:text-slate-900 font-bold";
+            if (modalTitle) modalTitle.textContent = isEditing ? "Revisi Pengeluaran Kas" : "Catat Pengeluaran Kas";
+            if (iconBox) {
+                iconBox.className = "w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold";
+                iconBox.innerHTML = '<i data-lucide="arrow-down-right" class="w-4 h-4"></i>';
+            }
             if (catSelect) {
-                catSelect.innerHTML = this.KATEGORI_PENGELUARAN.map(c => `<option value="${c}">${c}</option>`).join("");
+                const cats = [...this.KATEGORI_PENGELUARAN];
+                if (selectedCategory && !cats.includes(selectedCategory)) {
+                    cats.unshift(selectedCategory);
+                }
+                catSelect.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
+                if (selectedCategory) catSelect.value = selectedCategory;
             }
         } else {
-            if (btnPengeluaran) btnPengeluaran.className = "py-2 rounded-lg transition text-slate-600 hover:text-slate-900";
-            if (btnPemasukan) btnPemasukan.className = "py-2 rounded-lg transition bg-emerald-600 text-white shadow-xs";
-            if (modalTitle) modalTitle.textContent = "Catat Pemasukan Kas";
+            if (btnPengeluaran) btnPengeluaran.className = "py-2 rounded-lg transition text-slate-600 hover:text-slate-900 font-bold";
+            if (btnPemasukan) btnPemasukan.className = "py-2 rounded-lg transition bg-emerald-600 text-white shadow-xs font-bold";
+            if (modalTitle) modalTitle.textContent = isEditing ? "Revisi Pemasukan Kas" : "Catat Pemasukan Kas";
+            if (iconBox) {
+                iconBox.className = "w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold";
+                iconBox.innerHTML = '<i data-lucide="arrow-up-right" class="w-4 h-4"></i>';
+            }
             if (catSelect) {
-                catSelect.innerHTML = this.KATEGORI_PEMASUKAN.map(c => `<option value="${c}">${c}</option>`).join("");
+                const cats = [...this.KATEGORI_PEMASUKAN];
+                if (selectedCategory && !cats.includes(selectedCategory)) {
+                    cats.unshift(selectedCategory);
+                }
+                catSelect.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
+                if (selectedCategory) catSelect.value = selectedCategory;
             }
         }
+
+        if (window.lucide) lucide.createIcons();
     },
 
     handleManualTransactionSubmit(e) {
@@ -1165,20 +1261,58 @@ const EggApp = {
             return;
         }
 
+        const date = document.getElementById("manual-trx-date")?.value || new Date().toISOString().split('T')[0];
+        const time = document.getElementById("manual-trx-time")?.value || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
         const category = document.getElementById("manual-trx-category")?.value || "";
         const desc = document.getElementById("manual-trx-desc")?.value.trim() || category;
         const customer = document.getElementById("manual-trx-customer")?.value.trim() || undefined;
         const method = document.getElementById("manual-trx-method")?.value || "Tunai";
 
-        const today = new Date().toISOString().split('T')[0];
-        const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
-        const id = `TRX-${Date.now().toString().slice(-6)}`;
-
         const transactions = this.getCashTransactions();
+        const editingId = this.editingTrxId || document.getElementById("manual-trx-id")?.value;
+
+        if (editingId) {
+            const idx = transactions.findIndex(t => t.id === editingId);
+            if (idx !== -1) {
+                const oldTrx = transactions[idx];
+                transactions[idx] = {
+                    ...oldTrx,
+                    date: date,
+                    time: time,
+                    type: this.manualTransactionType,
+                    category: category,
+                    description: desc,
+                    amount: amount,
+                    paymentMethod: method,
+                    customerName: customer
+                };
+                this.saveCashTransactions(transactions);
+
+                // Jika terhubung ke Nota Penjualan, sinkronkan nominal bayar dan status lunas nota
+                if (oldTrx.invoiceId) {
+                    const invoices = this.getInvoices();
+                    const inv = invoices.find(i => i.id === oldTrx.invoiceId);
+                    if (inv) {
+                        inv.paidAmount = amount;
+                        inv.paymentMethod = method;
+                        inv.paymentStatus = (inv.paidAmount >= inv.finalAmount) ? 'Lunas' : 'Tempo';
+                        if (customer && !inv.buyerName) inv.buyerName = customer;
+                        this.saveInvoices(invoices);
+                    }
+                }
+
+                this.closeManualTransactionModal();
+                this.showToast("Transaksi kas berhasil direvisi!", "success");
+                return;
+            }
+        }
+
+        // Mode Tambah Transaksi Baru
+        const id = `TRX-${Date.now().toString().slice(-6)}`;
         transactions.unshift({
             id: id,
-            date: today,
-            time: timeNow,
+            date: date,
+            time: time,
             type: this.manualTransactionType,
             category: category,
             description: desc,
